@@ -24,7 +24,6 @@ jobs:
       run: dotnet build ./Backend/Backend.csproj -c Release --no-restore
       
     - name: Run Tests
-      # 🔥 FIX: Changed small 'b' to capital 'B'
       run: dotnet test ./Backend.Tests/Backend.Tests.csproj --no-build --verbosity normal
 
   build-frontend:
@@ -38,11 +37,9 @@ jobs:
         node-version: '20'
         
     - name: Install dependencies
-      # 🔥 FIX: Changed small 'f' to capital 'F'
       working-directory: ./Frontend
       run: npm ci
       
     - name: Build React App
-      # 🔥 FIX: Changed small 'f' to capital 'F'
       working-directory: ./Frontend
       run: npm run build
