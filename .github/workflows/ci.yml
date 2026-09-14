@@ -24,8 +24,8 @@ jobs:
       run: dotnet build ./Backend/Backend.csproj -c Release --no-restore
       
     - name: Run Tests
-      # Note: Integration tests ke liye action runner me fake env vars zaroori hain
-      run: dotnet test ./backend.Tests/backend.Tests.csproj --no-build --verbosity normal
+      # 🔥 FIX: Changed small 'b' to capital 'B'
+      run: dotnet test ./Backend.Tests/Backend.Tests.csproj --no-build --verbosity normal
 
   build-frontend:
     runs-on: ubuntu-latest
@@ -38,9 +38,11 @@ jobs:
         node-version: '20'
         
     - name: Install dependencies
-      working-directory: ./frontend
+      # 🔥 FIX: Changed small 'f' to capital 'F'
+      working-directory: ./Frontend
       run: npm ci
       
     - name: Build React App
-      working-directory: ./frontend
+      # 🔥 FIX: Changed small 'f' to capital 'F'
+      working-directory: ./Frontend
       run: npm run build
