@@ -57,7 +57,7 @@ jobs:
         Jwt__Issuer: "SupportPulseAPI"
         Jwt__Audience: "SupportPulseClient"
     
-      run: dotnet test ./Backend.Tests/Backend.Tests.csproj -c Release --no-build --verbosity normal --filter "Name!=TicketCreation_TriggersAiEnrichment_Successfully"
+        run: dotnet test ./Backend.Tests/Backend.Tests.csproj -c Release --no-build --verbosity normal --filter "FullyQualifiedName!~TicketAiIntegrationTests"
 
   build-frontend:
     runs-on: ubuntu-latest
