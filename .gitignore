@@ -1,0 +1,5 @@
+Backend/appsettings.Development.json
+.env
+[Bb]in/
+[Oo]bj/
+Backend/wwwroot/uploads/

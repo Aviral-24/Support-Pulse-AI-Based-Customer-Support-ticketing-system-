@@ -1,0 +1,78 @@
+
+version: '3.8'
+
+services:
+  # 1. Redis Cache & Queue
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  # 2. MinIO (Local S3 Storage)
+  s3-minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000" # S3 API Port
+      - "9001:9001" # Web Console Port
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    volumes:
+      - minio_data:/data
+
+  # 3. PostgreSQL Database Container
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: SupportPulse_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 4. ASP.NET Core Backend Container
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    ports:
+      - "5215:8080" # Container internal 8080 mapped to local 5215
+    dns:               # 🔥 FIX 1: HUGGINGFACE DNS ERROR RESOLVED
+      - 1.1.1.1
+      - 1.0.0.1
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=SupportPulse_db;Username=postgres;Password=${DB_PASS}
+      - ConnectionStrings__Redis=redis:6379,abortConnect=false
+      
+      # JWT Secrets
+      - Jwt__Key=ThisIsAVerySecureSecretKeyForSupportPulseProject2026!@#
+      - Jwt__Issuer=SupportPulseAPI
+      - Jwt__Audience=SupportPulseClient
+      
+      # AI API Keys
+    - Groq__ApiKey=YOUR_GROQ_API_KEY
+    - HuggingFace__ApiKey=YOUR_HUGGINGFACE_API_KEY
+      # Local S3 Config
+      - AWS__BucketName=support-pulse-files
+    depends_on:
+      - db
+      - redis
+      - s3-minio
+
+  # 5. React Frontend Container
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  minio_data:
