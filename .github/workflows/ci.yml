@@ -9,6 +9,24 @@ on:
 jobs:
   build-and-test-backend:
     runs-on: ubuntu-latest
+    
+    # 🔥 PROACTIVE FIX: GitHub Actions me Database aur Redis add kar diya 
+    # Taaki aapke Integration Tests bina kisi Connection Error ke pass ho jayein!
+    services:
+      postgres:
+        image: ankane/pgvector:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: Abhi@2080
+          POSTGRES_DB: SupportPulse_db
+        ports:
+          - 5433:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+
     steps:
     - uses: actions/checkout@v4
     
@@ -18,13 +36,14 @@ jobs:
         dotnet-version: 8.0.x
         
     - name: Restore dependencies
-      run: dotnet restore ./Backend/Backend.csproj
+      # 🔥 FIX: Ab hum Backend aur Tests dono ko ek sath restore aur build karenge
+      run: dotnet restore ./Backend.Tests/Backend.Tests.csproj
       
-    - name: Build Backend
-      run: dotnet build ./Backend/Backend.csproj -c Release --no-restore
+    - name: Build Backend & Tests
+      run: dotnet build ./Backend.Tests/Backend.Tests.csproj -c Release --no-restore
       
     - name: Run Tests
-      run: dotnet test ./Backend.Tests/Backend.Tests.csproj --no-build --verbosity normal
+      run: dotnet test ./Backend.Tests/Backend.Tests.csproj -c Release --no-build --verbosity normal
 
   build-frontend:
     runs-on: ubuntu-latest
