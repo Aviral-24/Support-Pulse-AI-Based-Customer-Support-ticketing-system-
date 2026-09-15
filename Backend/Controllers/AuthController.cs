@@ -24,29 +24,6 @@ public class AuthController : ControllerBase
         _configuration = configuration;
     }
 
-    // [HttpPost("register")]
-    // public async Task<IActionResult> Register([FromBody] RegisterDto request)
-    // {
-    //     if (await _context.Users.AnyAsync(u => u.Email == request.Email))
-    //         return BadRequest("User already exists.");
-
-    //     // Hash Password using BCrypt
-    //     string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-
-    //     var user = new User
-    //     {
-    //         Name = request.Name,
-    //         Email = request.Email,
-    //         PasswordHash = passwordHash,
-    //         Role = "Customer" // Default role
-    //     };
-
-    //     _context.Users.Add(user);
-    //     await _context.SaveChangesAsync();
-
-    //     return Ok(new { message = "User registered successfully!" });
-    // }
-
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto request)
     {

@@ -13,9 +13,7 @@ public class ProfileController : ControllerBase
     [HttpGet("me")]
     public IActionResult GetMyProfile()
     {
-        // BOLA/IDOR Protection: 
-        // Hum user ki ID URL (e.g. /profile/1) se lene ki bajaye, directly secure JWT token se le rahe hain.
-        // Koi bhi user URL manipulate karke kisi aur ka data nahi dekh payega.
+        
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var role = User.FindFirst(ClaimTypes.Role)?.Value;
 
