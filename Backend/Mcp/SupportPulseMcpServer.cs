@@ -16,8 +16,10 @@ public class SupportPulseMcpServer
         _pdfGenerator = pdfGenerator;
     }
 
+     protected SupportPulseMcpServer() { }
+
     // Tool 1: get_ticket_analytics
-    public async Task<string> GetTicketAnalyticsAsync(string? category, string? status, string? sentiment)
+    public virtual async Task<string> GetTicketAnalyticsAsync(string? category, string? status, string? sentiment)
     {
         var query = _context.Tickets.AsQueryable();
 
@@ -44,7 +46,7 @@ public class SupportPulseMcpServer
     }
 
     // Tool 2: generate_pdf_summary
-    public async Task<byte[]> GeneratePdfSummaryToolAsync(int ticketId)
+    public virtual async Task<byte[]> GeneratePdfSummaryToolAsync(int ticketId)
     {
         var ticket = await _context.Tickets
             .Include(t => t.Customer)
