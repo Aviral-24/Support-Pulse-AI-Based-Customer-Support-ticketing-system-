@@ -322,7 +322,8 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:5215/api/v1/Auth/login', { email, password });
+      //const response = await axios.post('http://localhost:5215/api/v1/Auth/login', { email, password });
+        const response = await axios.post('http://34.93.237.221:5215/api/v1/Auth/login', { email, password });
       
       const { token, role } = response.data;
       login(token, role);

@@ -146,7 +146,8 @@ const AnalyticsDashboard = () => {
     const fetchAnalytics = async () => {
         try {
             // Yahan par direct "user.token" use karenge jo upar top se mila hai
-            const response = await fetch('http://localhost:5215/api/v1/Analytics/dashboard', {
+//const response = await fetch('http://localhost:5215/api/v1/Analytics/dashboard', {
+                 const response = await fetch('http://34.93.237.221:5215/api/v1/Analytics/dashboard', {
                 headers: { 
                     'Authorization': `Bearer ${user.token}` 
                 }
