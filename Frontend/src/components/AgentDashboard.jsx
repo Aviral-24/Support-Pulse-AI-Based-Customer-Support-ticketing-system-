@@ -314,7 +314,8 @@ export default function AgentDashboard() {
 
   const fetchTickets = async () => {
     try {
-      const response = await axios.get('http://localhost:5215/api/v1/Tickets', {
+      //const response = await axios.get('http://localhost:5215/api/v1/Tickets', {
+       const response = await axios.get('http://34.93.237.221:5215/api/v1/Tickets', {
         headers: { 'Authorization': `Bearer ${user.token}` },
         params: { search, status: statusFilter, page, pageSize: 10 }
       });
@@ -334,7 +335,10 @@ export default function AgentDashboard() {
     
     setIsAiSearching(true);
     try {
-      const response = await axios.get('http://localhost:5215/api/v1/Tickets/semantic-search', {
+     // const response = await axios.get('http://localhost:5215/api/v1/Tickets/semantic-search', {
+        
+              const response = await axios.get('http://34.93.237.221:5215/api/v1/Tickets/semantic-search', {
+
         headers: { 'Authorization': `Bearer ${user.token}` },
         params: { query: aiQuery }
       });
