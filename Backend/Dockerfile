@@ -12,33 +12,65 @@
 # COPY --from=build /app/publish .
 # ENTRYPOINT ["dotnet", "Backend.dll"]
 
-# Base image for runtime
+# # Base image for runtime
+# FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+# WORKDIR /app
+# EXPOSE 8080
+
+# # 🔥 FIX: Install Fonts and FontConfig for QuestPDF in the Linux container
+# RUN apt-get update && apt-get install -y \
+#     fontconfig \
+#     libfreetype6 \
+#     fonts-dejavu-core \
+#     && rm -rf /var/lib/apt/lists/*
+
+# # Build image
+# FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# WORKDIR /src
+# COPY ["Backend.csproj", "./"]
+# RUN dotnet restore "./Backend.csproj"
+# COPY . .
+# WORKDIR "/src/."
+# RUN dotnet build "Backend.csproj" -c Release -o /app/build
+
+# # Publish
+# FROM build AS publish
+# RUN dotnet publish "Backend.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+# # Final image
+# FROM base AS final
+# WORKDIR /app
+# COPY --from=publish /app/publish .
+# ENTRYPOINT ["dotnet", "Backend.dll"]
+
+# 1. Base image for runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 EXPOSE 8080
 
-# 🔥 FIX: Install Fonts and FontConfig for QuestPDF in the Linux container
+# Install Fonts and FontConfig for QuestPDF
 RUN apt-get update && apt-get install -y \
     fontconfig \
     libfreetype6 \
     fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
-# Build image
+# 2. Build image
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
+
+# Copy ONLY the csproj first to maximize Docker layer caching
 COPY ["Backend.csproj", "./"]
 RUN dotnet restore "./Backend.csproj"
-COPY . .
-WORKDIR "/src/."
-RUN dotnet build "Backend.csproj" -c Release -o /app/build
 
-# Publish
-FROM build AS publish
+# Copy the rest of the source code (Requires a .dockerignore file to be fast!)
+COPY . .
+
+# Run publish directly (this implicitly builds the project)
 RUN dotnet publish "Backend.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-# Final image
+# 3. Final image
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "Backend.dll"]
