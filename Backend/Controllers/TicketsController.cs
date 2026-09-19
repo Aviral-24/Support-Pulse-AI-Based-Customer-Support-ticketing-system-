@@ -96,6 +96,8 @@ public class TicketsController : ControllerBase
     }
 
     [HttpGet("{id}")]
+
+    [Authorize(Roles = "Admin")] // 🔥 Agent hata diya
     public async Task<IActionResult> GetTicket(int id)
     {
         var ticket = await _context.Tickets.FindAsync(id);
@@ -140,7 +142,7 @@ public class TicketsController : ControllerBase
     }
 
     [HttpPut("{id}/status")]
-    [Authorize(Roles = "Agent,Admin")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateTicketStatusDto request, [FromServices] IAuditService _auditService)
     {
         var ticket = await _context.Tickets.FindAsync(id);
@@ -159,7 +161,7 @@ public class TicketsController : ControllerBase
     }
     
     [HttpPost("{id}/notes")]
-    [Authorize(Roles = "Agent,Admin")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> AddNote(int id, [FromBody] AddNoteDto request)
     {
         var agentId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -220,37 +222,235 @@ public class TicketsController : ControllerBase
         }
     }
 
-    // 🔥 THE SILVER BULLET: Direct AI Test Endpoint
+    // // 🔥 THE SILVER BULLET: Direct AI Test Endpoint
+    // [HttpGet("{id}/force-ai-test")]
+    // [Authorize] 
+    // public async Task<IActionResult> ForceAiTest(int id, [FromServices] IAIService _aiService)
+    // {
+    //     var ticket = await _context.Tickets.FindAsync(id);
+    //     if (ticket == null) return NotFound("Ticket not found.");
+
+    //     try
+    //     {
+    //         // 1. Text Analytics (Groq)
+    //         var aiResult = await _aiService.AnalyzeTicketAsync(ticket.Title ?? "", ticket.Description ?? "");
+    //         ticket.AiSummary = aiResult.Summary;
+    //         ticket.AiSentiment = aiResult.Sentiment;
+
+    //         // 2. Vector Embeddings (HuggingFace)
+    //         string textToEmbed = $"Title: {ticket.Title}. Details: {ticket.Description}. Sentiment: {ticket.AiSentiment}";
+    //         ticket.Embedding = await _aiService.GenerateEmbeddingAsync(textToEmbed);
+
+    //         ticket.Status = "In Progress";
+    //         await _context.SaveChangesAsync(); // Database me vectors save!
+
+    //         return Ok(new { 
+    //             message = "🔥 AI Enrichment SUCCESSFUL! Vectors are saved to Database.", 
+    //             summary = ticket.AiSummary, 
+    //             sentiment = ticket.AiSentiment 
+    //         });
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return StatusCode(500, new { message = "AI API Failed", error = ex.Message });
+    //     }
+    // }
+
+    // // 🔥 THE SILVER BULLET: Direct AI Test Endpoint (UPDATED FOR CASE 3)
+    // [HttpGet("{id}/force-ai-test")]
+    // [Authorize] 
+    // public async Task<IActionResult> ForceAiTest(int id, [FromServices] IAIService _aiService, [FromServices] IStorageService _storageService)
+    // {
+    //     var ticket = await _context.Tickets.FindAsync(id);
+    //     if (ticket == null) return NotFound("Ticket not found.");
+
+    //     try
+    //     {
+    //         string finalDescription = ticket.Description ?? "";
+
+    //         // // 1. 🔥 AUDIO TRANSCRIPTION LOGIC (CASE 3 FIX)
+    //         // if (!string.IsNullOrEmpty(ticket.AudioUrl))
+    //         // {
+    //         //     // MinIO se file ka temporary URL nikal kar download karein
+    //         //     var audioDownloadUrl = _storageService.GenerateSignedUrl(ticket.AudioUrl);
+    //         //     using var httpClient = new HttpClient();
+    //         //     var audioBytes = await httpClient.GetByteArrayAsync(audioDownloadUrl);
+    //         //     using var audioStream = new MemoryStream(audioBytes);
+
+    //         //     // Whisper AI ko bhejein
+    //         //     string transcript = await _aiService.TranscribeAudioAsync(audioStream, "audio.wav");
+
+    //         //     // Transcript ko original description ke niche jod dein
+    //         //     finalDescription = $"{finalDescription}\n\n[🎙️ Audio Transcript]: {transcript}";
+    //         //     ticket.Description = finalDescription; 
+    //         // }
+
+    //         // 1. 🔥 AUDIO TRANSCRIPTION LOGIC (CASE 3 FIX)
+    //         if (!string.IsNullOrEmpty(ticket.AudioUrl))
+    //         {
+    //             var audioDownloadUrl = _storageService.GenerateSignedUrl(ticket.AudioUrl);
+                
+    //             // 🔥 DOCKER NETWORK FIX: Agar URL me 'localhost' hai toh Docker container ka actual naam use karein
+    //             audioDownloadUrl = audioDownloadUrl.Replace("localhost", "support-pulse-s3-minio-1")
+    //                                                .Replace("127.0.0.1", "support-pulse-s3-minio-1");
+
+    //             // 🔥 SSL BYPASS FIX: Docker ke SSL errors ko ignore karne ke liye handler add kiya
+    //             var handler = new HttpClientHandler 
+    //             { 
+    //                 ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true 
+    //             };
+    //             using var httpClient = new HttpClient(handler);
+                
+    //             var audioBytes = await httpClient.GetByteArrayAsync(audioDownloadUrl);
+    //             using var audioStream = new MemoryStream(audioBytes);
+
+    //             // Whisper AI ko bhejein
+    //             string transcript = await _aiService.TranscribeAudioAsync(audioStream, "audio.wav");
+
+    //             // Transcript ko original description ke niche jod dein
+    //             finalDescription = $"{finalDescription}\n\n[🎙️ Audio Transcript]: {transcript}";
+    //             ticket.Description = finalDescription; 
+    //         }
+
+    //         // 2. Text Analytics (Groq) - Ab ye audio transcript ko bhi padhega!
+    //         var aiResult = await _aiService.AnalyzeTicketAsync(ticket.Title ?? "", finalDescription);
+    //         ticket.AiSummary = aiResult.Summary;
+    //         ticket.AiSentiment = aiResult.Sentiment;
+    //         ticket.AiCategory = aiResult.Priority; // Priority save kar rahe hain
+
+    //         // 3. Vector Embeddings (HuggingFace)
+    //         string textToEmbed = $"Title: {ticket.Title}. Details: {finalDescription}. Sentiment: {ticket.AiSentiment}";
+    //         ticket.Embedding = await _aiService.GenerateEmbeddingAsync(textToEmbed);
+
+    //         ticket.Status = "In Progress";
+    //         await _context.SaveChangesAsync(); 
+
+    //         return Ok(new { 
+    //             message = "🔥 Audio Transcription & AI Enrichment SUCCESSFUL!", 
+    //             transcriptAdded = !string.IsNullOrEmpty(ticket.AudioUrl),
+    //             updatedDescription = ticket.Description,
+    //             summary = ticket.AiSummary, 
+    //             sentiment = ticket.AiSentiment 
+    //         });
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return StatusCode(500, new { message = "AI API Failed", error = ex.Message });
+    //     }
+    // }
+
+
+// 🔥 THE SILVER BULLET: Direct AI Test Endpoint (CRASH-PROOF VERSION)
     [HttpGet("{id}/force-ai-test")]
     [Authorize] 
-    public async Task<IActionResult> ForceAiTest(int id, [FromServices] IAIService _aiService)
+    public async Task<IActionResult> ForceAiTest(int id, [FromServices] IAIService _aiService, [FromServices] IStorageService _storageService)
     {
         var ticket = await _context.Tickets.FindAsync(id);
         if (ticket == null) return NotFound("Ticket not found.");
 
         try
         {
-            // 1. Text Analytics (Groq)
-            var aiResult = await _aiService.AnalyzeTicketAsync(ticket.Title ?? "", ticket.Description ?? "");
+            string finalDescription = ticket.Description ?? "";
+
+            // 1. 🔥 AUDIO TRANSCRIPTION LOGIC (CASE 3 FIX)
+            if (!string.IsNullOrEmpty(ticket.AudioUrl))
+            {
+                try 
+                {
+                    var audioDownloadUrl = _storageService.GenerateSignedUrl(ticket.AudioUrl);
+                    
+                    // 🔥 MAIN FIX: Container name lagaya aur FORCEFULLY 'https' ko 'http' kiya
+                    audioDownloadUrl = audioDownloadUrl.Replace("localhost", "support-pulse-s3-minio-1")
+                                                       .Replace("127.0.0.1", "support-pulse-s3-minio-1")
+                                                       .Replace("https://", "http://"); 
+
+                    var handler = new HttpClientHandler 
+                    { 
+                        ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true 
+                    };
+                    using var httpClient = new HttpClient(handler);
+                    
+                    var audioBytes = await httpClient.GetByteArrayAsync(audioDownloadUrl);
+                    using var audioStream = new MemoryStream(audioBytes);
+
+                    // Whisper AI ko bhejein
+                    string transcript = await _aiService.TranscribeAudioAsync(audioStream, "audio.wav");
+                    
+                    finalDescription = $"{finalDescription}\n\n[🎙️ Audio Transcript]: {transcript}";
+                }
+                catch (Exception audioEx)
+                {
+                    // 🛡️ SAFETY NET: Agar MinIO ya Whisper fail ho, toh app crash nahi hogi!
+                    finalDescription = $"{finalDescription}\n\n[⚠️ Audio Error]: {audioEx.Message}";
+                }
+            }
+
+            ticket.Description = finalDescription; 
+
+            // 2. Text Analytics (Groq)
+            var aiResult = await _aiService.AnalyzeTicketAsync(ticket.Title ?? "", finalDescription);
             ticket.AiSummary = aiResult.Summary;
             ticket.AiSentiment = aiResult.Sentiment;
+            ticket.AiCategory = aiResult.Priority;
 
-            // 2. Vector Embeddings (HuggingFace)
-            string textToEmbed = $"Title: {ticket.Title}. Details: {ticket.Description}. Sentiment: {ticket.AiSentiment}";
+            // 3. Vector Embeddings (HuggingFace)
+            string textToEmbed = $"Title: {ticket.Title}. Details: {finalDescription}. Sentiment: {ticket.AiSentiment}";
             ticket.Embedding = await _aiService.GenerateEmbeddingAsync(textToEmbed);
 
             ticket.Status = "In Progress";
-            await _context.SaveChangesAsync(); // Database me vectors save!
+            await _context.SaveChangesAsync(); 
 
             return Ok(new { 
-                message = "🔥 AI Enrichment SUCCESSFUL! Vectors are saved to Database.", 
+                message = "🔥 AI Enrichment Processed Successfully!", 
+                transcriptAdded = !string.IsNullOrEmpty(ticket.AudioUrl),
+                updatedDescription = ticket.Description,
                 summary = ticket.AiSummary, 
                 sentiment = ticket.AiSentiment 
             });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "AI API Failed", error = ex.Message });
+            return StatusCode(500, new { message = "AI API Failed", error = ex.Message, inner = ex.InnerException?.Message });
+        }
+    }
+
+    // 🔥 THE RAG ENDPOINT: Auto-Generate Reply based on Vector DB
+    [HttpPost("{id}/draft-reply")]
+    [Authorize]
+    public async Task<IActionResult> GenerateDraftReply(int id, [FromServices] IAIService _aiService)
+    {
+        var ticket = await _context.Tickets.FindAsync(id);
+        if (ticket == null) return NotFound("Ticket not found.");
+        if (ticket.Embedding == null) return BadRequest("Ticket is still being analyzed by AI. Please wait.");
+
+        try
+        {
+            // 1. RETRIEVE: Vector DB me purani RESOLVED tickets dhoondo jo is issue se milti-julti hon
+            var similarResolvedTickets = await _context.Tickets
+                .Where(t => t.Id != id && t.Status == "Resolved" && t.Embedding != null)
+                .OrderBy(t => t.Embedding!.L2Distance(ticket.Embedding)) // PgVector Semantic Search
+                .Take(2) // Top 2 sabse accurate solutions
+                .ToListAsync();
+
+            // 2. AUGMENT: Un solutions ka text combine karo
+            string context = "";
+            foreach (var t in similarResolvedTickets)
+            {
+                context += $"- Past Issue: {t.Title}\n- Details & Solution: {t.Description}\n\n";
+            }
+
+            if (string.IsNullOrEmpty(context)) {
+                context = "No similar resolved past tickets found in the database.";
+            }
+
+            // 3. GENERATE: Groq AI ko context bhej kar email draft karwao
+            string draft = await _aiService.GenerateDraftReplyAsync(ticket.Description ?? ticket.Title ?? "", context);
+
+            return Ok(new { draftReply = draft });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Failed to generate AI reply.", error = ex.Message });
         }
     }
 }

@@ -24,32 +24,32 @@ public class AuthController : ControllerBase
         _configuration = configuration;
     }
 
-    [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterDto request)
-    {
-        if (await _context.Users.AnyAsync(u => u.Email == request.Email))
-            return BadRequest("User already exists.");
+//     [HttpPost("register")]
+//     public async Task<IActionResult> Register([FromBody] RegisterDto request)
+//     {
+//         if (await _context.Users.AnyAsync(u => u.Email == request.Email))
+//             return BadRequest("User already exists.");
 
-        // Hash Password using BCrypt
-        string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password, workFactor: 10); // 🔥 NINJA FIX: Workfactor ko 12 set kiya for better security
-       // bool isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash); 
+//         // Hash Password using BCrypt
+//         string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password, workFactor: 10); // 🔥 NINJA FIX: Workfactor ko 12 set kiya for better security
+//        // bool isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash); 
 
-        // 🔥 NINJA FIX: Agar email me "agent" likha hai, toh usko Agent bana do!
-        string assignedRole = request.Email.ToLower().Contains("agent") ? "Agent" : "Customer";
+//         // 🔥 NINJA FIX: Agar email me "agent" likha hai, toh usko Agent bana do!
+//         string assignedRole = request.Email.ToLower().Contains("agent") ? "Agent" : "Customer";
  
-        var user = new User
-        {
-            Name = request.Name,
-            Email = request.Email,
-            PasswordHash = passwordHash,
-            Role = assignedRole 
-        };
+//         var user = new User
+//         {
+//             Name = request.Name,
+//             Email = request.Email,
+//             PasswordHash = passwordHash,
+//             Role = assignedRole 
+//         };
 
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
+//         _context.Users.Add(user);
+//         await _context.SaveChangesAsync();
 
-        return Ok(new { message = $"User registered successfully as {assignedRole}!" });
-    }
+//         return Ok(new { message = $"User registered successfully as {assignedRole}!" });
+//     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto request)
@@ -87,4 +87,32 @@ public class AuthController : ControllerBase
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+
+
+[HttpPost("register")]
+public async Task<IActionResult> Register([FromBody] RegisterDto request)
+{
+    if (await _context.Users.AnyAsync(u => u.Email == request.Email))
+        return BadRequest("User already exists.");
+
+    string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password, workFactor: 8); 
+
+    // 🔥 NINJA FIX UPDATED: Ab email me kuch likhne ki zaroorat nahi! 
+    // Frontend se 'Admin' aayega toh Admin banega, warna default 'Customer'
+    string assignedRole = request.Role == "Admin" ? "Admin" : "Customer";
+
+    var user = new User
+    {
+        Name = request.Name,
+        Email = request.Email,
+        PasswordHash = passwordHash,
+        Role = assignedRole 
+    };
+
+    _context.Users.Add(user);
+    await _context.SaveChangesAsync();
+
+    return Ok(new { message = $"User registered successfully as {assignedRole}!" });
+}
+
 }
