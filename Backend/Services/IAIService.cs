@@ -14,4 +14,9 @@ public interface IAIService
     
     // Audio Transcription
     Task<string> TranscribeAudioAsync(Stream audioStream, string fileName); 
+
+    //  NEW: Vision AI Method
+    Task<string> AnalyzeImageAsync(Stream imageStream, string mimeType);
+
+    Task<string> GenerateDraftReplyAsync(string issueDescription, string pastSolutionsContext);
 }
