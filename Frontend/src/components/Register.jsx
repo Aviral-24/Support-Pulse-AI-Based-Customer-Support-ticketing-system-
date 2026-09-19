@@ -429,8 +429,8 @@ export default function Register() {
     setLoading(true);
     try {
       // API call me role direct ja raha hai
-      await axios.post('http://localhost:5215/api/v1/Auth/register', { name, email, password, role });
-       // await axios.post('http://34.93.237.221:5215/api/v1/Auth/register', { name, email, password, role });
+         // await axios.post('http://localhost:5215/api/v1/Auth/register', { name, email, password, role });
+         await axios.post('http://34.93.237.221:5215/api/v1/Auth/register', { name, email, password, role });
       toast.success('Registration successful! Please login.');
       navigate('/login');
     } catch (error) {

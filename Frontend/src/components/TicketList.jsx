@@ -1,6 +1,6 @@
-import { InboxIcon } from 'lucide-react'; // Empty state icon
+import { InboxIcon } from 'lucide-react'; 
 
-// 🦴 Skeleton Component (animate-pulse)
+//  Skeleton Component (animate-pulse)
 const TicketSkeleton = () => (
   <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-100 flex gap-4 animate-pulse">
     <div className="w-12 h-12 bg-gray-200 rounded-full"></div>

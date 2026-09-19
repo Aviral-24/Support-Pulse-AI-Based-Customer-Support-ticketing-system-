@@ -668,7 +668,8 @@ export default function AgentDashboard() {
 
   const fetchTickets = async () => {
     try {
-      const response = await axios.get('http://localhost:5215/api/v1/Tickets', {
+      const response = await axios.get('http://34.93.237.221:5215/api/v1/Tickets', {
+        // const response = await axios.get('http://localhost:5215/api/v1/Tickets', {
         headers: { 'Authorization': `Bearer ${user.token}` },
         params: { search, status: statusFilter, page, pageSize: 10 }
       });
@@ -683,7 +684,8 @@ export default function AgentDashboard() {
     setIsGeneratingReply(true);
     const loadingToast = toast.loading("🧠 Searching past solutions & drafting reply...");
     try {
-      const response = await axios.post(`http://localhost:5215/api/v1/Tickets/${ticketId}/draft-reply`, {}, {
+      const response = await axios.post(`http://34.93.237.221:5215/api/v1/Tickets/${ticketId}/draft-reply`, {}, {
+        //const response = await axios.post(`http://localhost:5215/api/v1/Tickets/${ticketId}/draft-reply`, {}, {
         headers: { 'Authorization': `Bearer ${user.token}` }
       });
       setDraftReply(response.data.draftReply);
@@ -705,7 +707,9 @@ export default function AgentDashboard() {
     
     setIsAiSearching(true);
     try {
-      const response = await axios.get('http://localhost:5215/api/v1/Tickets/semantic-search', {
+      const response = await axios.get('http://34.93.237.221:5215/api/v1/Tickets/semantic-search', {
+
+         // const response = await axios.get('http://localhost:5215/api/v1/Tickets/semantic-search', {
         headers: { 'Authorization': `Bearer ${user.token}` },
         params: { query: aiQuery }
       });
@@ -728,7 +732,8 @@ export default function AgentDashboard() {
 
   const updateStatus = async (id, newStatus) => {
     try {
-      await axios.put(`http://localhost:5215/api/v1/Tickets/${id}/status`, 
+     await axios.put(`http://34.93.237.221:5215/api/v1/Tickets/${id}/status`, 
+       // await axios.put(`http://localhost:5215/api/v1/Tickets/${id}/status`, 
         { status: newStatus },
         { headers: { 'Authorization': `Bearer ${user.token}` } }
       );
@@ -742,7 +747,8 @@ export default function AgentDashboard() {
   const addNote = async (id) => {
     if (!note.trim()) return toast.error("Note cannot be empty!");
     try {
-      await axios.post(`http://localhost:5215/api/v1/Tickets/${id}/notes`, 
+         await axios.post(`http://34.93.237.221:5215/api/v1/Tickets/${id}/notes`, 
+      //await axios.post(`http://localhost:5215/api/v1/Tickets/${id}/notes`, 
         { note: note },
         { headers: { 'Authorization': `Bearer ${user.token}` } }
       );
@@ -757,7 +763,8 @@ export default function AgentDashboard() {
   const handleDownloadPdf = async (ticketId) => {
     const loadingToast = toast.loading("Generating PDF report...");
     try {
-        const response = await fetch(`http://localhost:5215/api/v1/Tickets/${ticketId}/pdf`, {
+       const response = await fetch(`http://34.93.237.221:5215/api/v1/Tickets/${ticketId}/pdf`, {
+       // const response = await fetch(`http://localhost:5215/api/v1/Tickets/${ticketId}/pdf`, {
             headers: { 'Authorization': `Bearer ${user.token}` }
         });
         if (!response.ok) throw new Error("PDF download failed");

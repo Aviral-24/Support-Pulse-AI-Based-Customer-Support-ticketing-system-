@@ -8,7 +8,7 @@ export default function TicketForm() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: 'Low', // 🔥 Default value 'Low' set kar di hai
+    category: 'Low', 
   });
   const [audioFile, setAudioFile] = useState(null);
   const [imageFile, setImageFile] = useState(null);
@@ -36,7 +36,8 @@ export default function TicketForm() {
     if (imageFile) data.append('ImageFile', imageFile);
 
     try {
-      const response = await axios.post('http://localhost:5215/api/v1/Tickets', data, {
+        const response = await axios.post('http://34.93.237.221:5215/api/v1/Tickets', data, {
+        // const response = await axios.post('http://localhost:5215/api/v1/Tickets', data, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${user.token}`
@@ -45,7 +46,6 @@ export default function TicketForm() {
       
       toast.success(`Ticket submitted successfully! ID: ${response.data.ticketId}`);
       
-      // 🔥 Form reset hone par category wapas 'Low' ho jayegi
       setFormData({ title: '', description: '', category: 'Low' });
       setAudioFile(null);
       setImageFile(null);

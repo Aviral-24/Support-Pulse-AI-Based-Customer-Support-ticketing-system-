@@ -131,13 +131,13 @@ const AnalyticsDashboard = () => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     
-    // 🔥 RULE OF HOOKS: useAuth() hamesha top level par call hona chahiye!
+   
     const { user } = useAuth(); 
 
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
     useEffect(() => {
-        // Jab user aur token dono load ho jayein, tabhi API hit karein
+       
         if (user && user.token) {
             fetchAnalytics();
         }
@@ -145,9 +145,9 @@ const AnalyticsDashboard = () => {
 
     const fetchAnalytics = async () => {
         try {
-            // Yahan par direct "user.token" use karenge jo upar top se mila hai
-const response = await fetch('http://localhost:5215/api/v1/Analytics/dashboard', {
-                // const response = await fetch('http://34.93.237.221:5215/api/v1/Analytics/dashboard', {
+          
+            //const response = await fetch('http://localhost:5215/api/v1/Analytics/dashboard', {
+                 const response = await fetch('http://34.93.237.221:5215/api/v1/Analytics/dashboard', {
                 headers: { 
                     'Authorization': `Bearer ${user.token}` 
                 }
