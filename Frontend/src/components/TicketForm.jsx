@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
-import toast from 'react-hot-toast'; // Toast import kiya
+import toast from 'react-hot-toast';
 import Galaxy from './Galaxy';
 import { useAuth } from '../context/AuthContext';
 
@@ -8,19 +8,25 @@ export default function TicketForm() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: 'General',
+    category: 'Low', // 🔥 Default value 'Low' set kar di hai
   });
   const [audioFile, setAudioFile] = useState(null);
   const [imageFile, setImageFile] = useState(null);
-  const [loading, setLoading] = useState(false); // Naya loading state
+  const [loading, setLoading] = useState(false);
 
-  // IMPORTANT: Testing ke liye apna Customer Token
-  //const customerToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJyYWh1bEB0ZXN0LmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkN1c3RvbWVyIiwiZXhwIjoxNzkxNDg0MzQ0LCJpc3MiOiJTdXBwb3J0UHVsc2VBUEkiLCJhdWQiOiJTdXBwb3J0UHVsc2VDbGllbnQifQ.DVgDxrdoHa3ePRIcuajEDjNjX3VwZsNS0Armlcg2oeM";
   const { user } = useAuth();
+
+  // 🎨 Dropdown ka color change karne wala function
+  const getCategoryColor = (cat) => {
+    if (cat === 'High') return 'bg-red-50 text-red-700 border-red-300';
+    if (cat === 'Medium') return 'bg-yellow-50 text-yellow-700 border-yellow-300';
+    if (cat === 'Low') return 'bg-green-50 text-green-700 border-green-300';
+    return 'bg-white text-gray-700 border-gray-300'; // Default
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Loading shuru
+    setLoading(true); 
     
     const data = new FormData();
     data.append('Title', formData.title);
@@ -30,29 +36,26 @@ export default function TicketForm() {
     if (imageFile) data.append('ImageFile', imageFile);
 
     try {
-      //const response = await axios.post('http://localhost:5215/api/v1/Tickets', data, {
-          const response = await axios.post('http://34.93.237.221:5215/api/v1/Tickets', data, {
+      const response = await axios.post('http://localhost:5215/api/v1/Tickets', data, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${user.token}`
         }
       });
       
-      // Stylish Success Toast
       toast.success(`Ticket submitted successfully! ID: ${response.data.ticketId}`);
       
-      // Form ko wapas empty karna
-      setFormData({ title: '', description: '', category: 'General' });
+      // 🔥 Form reset hone par category wapas 'Low' ho jayegi
+      setFormData({ title: '', description: '', category: 'Low' });
       setAudioFile(null);
       setImageFile(null);
-      e.target.reset(); // File inputs ko DOM se clear karne ke liye
+      e.target.reset(); 
       
     } catch (error) {
-      // Stylish Error Toast
       const errorMsg = error.response?.data?.message || error.message;
       toast.error(`Error: ${errorMsg}`);
     } finally {
-      setLoading(false); // Loading band
+      setLoading(false); 
     }
   };
 
@@ -94,17 +97,17 @@ export default function TicketForm() {
           ></textarea>
         </div>
 
-        {/* Category Dropdown (Aapke state me tha, par UI me nahi tha) */}
+        {/* 🔥 UPDATED: Category Dropdown with Colors and correct values */}
         <div>
-          <label className="block font-medium text-gray-700 mb-1">Category</label>
+          <label className="block font-medium text-gray-700 mb-1">Priority (Category)</label>
           <select 
             value={formData.category}
             onChange={(e) => setFormData({...formData, category: e.target.value})}
-            className="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+            className={`w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all font-semibold ${getCategoryColor(formData.category)}`}
           >
-            <option value="General">General</option>
-            <option value="Technical">Technical Issue</option>
-            <option value="Billing">Billing & Payments</option>
+            <option value="Low" className="text-green-700 bg-white font-semibold">Low</option>
+            <option value="Medium" className="text-yellow-700 bg-white font-semibold">Medium</option>
+            <option value="High" className="text-red-700 bg-white font-semibold">High</option>
           </select>
         </div>
 
