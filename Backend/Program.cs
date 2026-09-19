@@ -11,6 +11,7 @@ using System.Threading.RateLimiting;
 using Backend.Services;
 using Backend.Services.Async; 
 using Backend.Services.Pdf;
+using Backend.Workers; // 🔥 FIX 1: Naye Background Worker ka namespace add kiya
 using Sentry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -26,7 +27,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 QuestPDF.Settings.License = LicenseType.Community;
 
-// ✅ FIX 1: Static Logger Hata Diya (Parallel xUnit test crashes fix)
+// ✅ Static Logger Hata Diya (Parallel xUnit test crashes fix)
 builder.Host.UseSerilog((context, services, configuration) => configuration
     .ReadFrom.Configuration(context.Configuration)
     .ReadFrom.Services(services)
@@ -58,7 +59,7 @@ builder.Services.AddHttpClient("OpenAIClient")
         options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(30);
     });
 
-// ✅ FIX 2: Redis, DB, aur JWT ke liye Fallback strings add ki (Null Reference fix in Tests)
+// ✅ Redis, DB, aur JWT ke liye Fallback strings add ki
 var redisConn = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp => 
     ConnectionMultiplexer.Connect(redisConn + ",abortConnect=false")
@@ -66,7 +67,10 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 
 builder.Services.AddHttpClient<IAIService, AiService>();
 builder.Services.AddSingleton<ITicketQueue, RedisTicketQueue>(); 
-builder.Services.AddHostedService<AiEnrichmentWorker>();
+
+// 🔥 FIX 2: Purane AiEnrichmentWorker ko hata diya taaki conflict na ho, aur naya Crash-Proof worker laga diya
+builder.Services.AddHostedService<TicketProcessingWorker>();
+
 builder.Services.AddHttpContextAccessor();
 
 var s3Config = new AmazonS3Config { ServiceURL = "http://s3-minio:9000", ForcePathStyle = true, UseHttp = true };
@@ -95,7 +99,19 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(dbConn, o => o.UseVector())); 
 
 builder.Services.AddHealthChecks();
-builder.Services.AddCors(options => { options.AddPolicy("AllowAll", policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()); });
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") 
+       // policy.WithOrigins("http://34.93.237.221:5173") 
+        
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials(); 
+    });
+});
 
 // ✅ JWT Fallback for tests
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "test_issuer";
@@ -134,7 +150,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles(); 
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseRateLimiter();
-app.UseCors("AllowAll");
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseSentryTracing();
