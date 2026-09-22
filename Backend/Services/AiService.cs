@@ -174,41 +174,77 @@ public class AiService : IAIService
         return doc.RootElement.GetProperty("text").GetString() ?? "";
     }
 
-    // 🔥 NEW: Image to Text (Vision AI) Logic
-    public async Task<string> AnalyzeImageAsync(Stream imageStream, string mimeType)
+    //Image to Text (Vision AI) Logic
+
+    // 🔥 NEW: Image to Text (Vision AI) Logic - FIXED
+public async Task<string> AnalyzeImageAsync(Stream imageStream, string mimeType)
+{
+    try 
     {
-        try 
-        {
-            // 1. Image ko bytes se Base64 Format me convert karna (AI ko images aisi hi samajh aati hain)
-            using var memoryStream = new MemoryStream();
-            await imageStream.CopyToAsync(memoryStream);
-            byte[] imageBytes = memoryStream.ToArray();
-            string base64Image = Convert.ToBase64String(imageBytes);
-            
-            // 2. Data URL banana (e.g., data:image/png;base64,iVBORw0KGgo...)
-            string dataUrl = $"data:{mimeType};base64,{base64Image}";
+        // 1. Image ko bytes me convert karna
+        using var memoryStream = new MemoryStream();
+        await imageStream.CopyToAsync(memoryStream);
+        byte[] imageBytes = memoryStream.ToArray();
+        
+        // 🔥 FIX 1: Lamba Base64 string Uri me daalne ki jagah direct BinaryData use karein
+        // Isse "URI too long" wala crash nahi hoga
+        var imageContent = ChatMessageContentPart.CreateImagePart(BinaryData.FromBytes(imageBytes), mimeType);
 
-            // 3. Groq ka Vision Model use karna
-            var chatClient = _groqClient.GetChatClient("llama-3.2-11b-vision-preview");
-            
-            // 4. AI ko Image aur Instruction dono bhejna
-            var messages = new List<ChatMessage>
-            {
-                new UserChatMessage(
-                    ChatMessageContentPart.CreateTextPart("Analyze this screenshot attached by a user in a support ticket. Extract any error messages exactly as they appear. Briefly describe the UI or the problem visible in 2-3 sentences."),
-                    ChatMessageContentPart.CreateImagePart(new Uri(dataUrl))
-                )
-            };
-
-            var response = await chatClient.CompleteChatAsync(messages);
-            return response.Value.Content[0].Text;
-        }
-        catch (Exception ex)
+        // 🔥 FIX 2: Groq ka 90b vision model use karein (agar 11b account me available nahi hai)
+        var chatClient = _groqClient.GetChatClient("llama-3.2-90b-vision-preview");
+        
+        var messages = new List<ChatMessage>
         {
-            Console.WriteLine($"\n[WARNING] Vision AI Error: {ex.Message}");
-            return "Vision AI could not analyze this image.";
-        }
+            new UserChatMessage(
+                ChatMessageContentPart.CreateTextPart("Analyze this screenshot attached by a user in a support ticket. Extract any error messages exactly as they appear. Briefly describe the UI or the problem visible in 2-3 sentences."),
+                imageContent
+            )
+        };
+
+        var response = await chatClient.CompleteChatAsync(messages);
+        return response.Value.Content[0].Text;
     }
+    catch (Exception ex)
+    {
+        // Console par exact error print hoga taaki debugging aasaan ho
+        Console.WriteLine($"\n[WARNING] Vision AI Error: {ex.Message}");
+        return $"Vision AI Error: {ex.Message}";
+    }
+}
+    // public async Task<string> AnalyzeImageAsync(Stream imageStream, string mimeType)
+    // {
+    //     try 
+    //     {
+    //         // Image ko bytes se Base64 Format me convert karna (AI ko images aisi hi samajh aati hain)
+    //         using var memoryStream = new MemoryStream();
+    //         await imageStream.CopyToAsync(memoryStream);
+    //         byte[] imageBytes = memoryStream.ToArray();
+    //         string base64Image = Convert.ToBase64String(imageBytes);
+            
+    //         //Data URL banana (e.g., data:image/png;base64,iVBORw0KGgo...)
+    //         string dataUrl = $"data:{mimeType};base64,{base64Image}";
+
+    //         // Groq ka Vision Model use karna
+    //         var chatClient = _groqClient.GetChatClient("llama-3.2-11b-vision-preview");
+            
+    //         //AI ko Image aur Instruction dono bhejna
+    //         var messages = new List<ChatMessage>
+    //         {
+    //             new UserChatMessage(
+    //                 ChatMessageContentPart.CreateTextPart("Analyze this screenshot attached by a user in a support ticket. Extract any error messages exactly as they appear. Briefly describe the UI or the problem visible in 2-3 sentences."),
+    //                 ChatMessageContentPart.CreateImagePart(new Uri(dataUrl))
+    //             )
+    //         };
+
+    //         var response = await chatClient.CompleteChatAsync(messages);
+    //         return response.Value.Content[0].Text;
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine($"\n[WARNING] Vision AI Error: {ex.Message}");
+    //         return "Vision AI could not analyze this image.";
+    //     }
+    // }
 
     // RAG Auto-Reply Generation
     public async Task<string> GenerateDraftReplyAsync(string issueDescription, string pastSolutionsContext)
