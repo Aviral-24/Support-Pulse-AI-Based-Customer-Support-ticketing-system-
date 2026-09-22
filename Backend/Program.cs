@@ -11,7 +11,7 @@ using System.Threading.RateLimiting;
 using Backend.Services;
 using Backend.Services.Async; 
 using Backend.Services.Pdf;
-using Backend.Workers; // 🔥 FIX 1: Naye Background Worker ka namespace add kiya
+using Backend.Workers; 
 using Sentry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -22,6 +22,7 @@ using Microsoft.Extensions.Http.Resilience;
 using StackExchange.Redis; 
 using QuestPDF.Infrastructure; 
 using Backend.Mcp;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,7 +69,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 builder.Services.AddHttpClient<IAIService, AiService>();
 builder.Services.AddSingleton<ITicketQueue, RedisTicketQueue>(); 
 
-// 🔥 FIX 2: Purane AiEnrichmentWorker ko hata diya taaki conflict na ho, aur naya Crash-Proof worker laga diya
+// Purane AiEnrichmentWorker ko hata diya taaki conflict na ho, aur naya Crash-Proof worker laga diya
 builder.Services.AddHostedService<TicketProcessingWorker>();
 
 builder.Services.AddHttpContextAccessor();
@@ -93,10 +94,16 @@ builder.Services.AddSwaggerGen(c =>
     { new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } }, new string[] { } }});
 });
 
-// ✅ DB Fallback for tests
-var dbConn = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Host=localhost;Database=testdb;Username=postgres;Password=postgres";
+
+var dbConn = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Host=localhost;Database=SupportPulse_db;Username=postgres;Password=Abhi@2080";
+
+//  Npgsql 8.0+ ke liye DataSourceBuilder me Vector map karna zaroori hai
+var dataSourceBuilder = new NpgsqlDataSourceBuilder(dbConn);
+dataSourceBuilder.UseVector();
+var dataSource = dataSourceBuilder.Build();
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(dbConn, o => o.UseVector())); 
+    options.UseNpgsql(dataSource, o => o.UseVector()));
 
 builder.Services.AddHealthChecks();
 
@@ -104,8 +111,8 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") 
-       // policy.WithOrigins("http://34.93.237.221:5173") 
+        //policy.WithOrigins("http://localhost:5173") 
+        policy.WithOrigins("http://34.93.237.221:5173") 
         
               .AllowAnyHeader()
               .AllowAnyMethod()
@@ -133,12 +140,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+    // Rate Limiter
 builder.Services.AddRateLimiter(options =>
 {
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
         RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            factory: _ => new FixedWindowRateLimiterOptions { AutoReplenishment = true, PermitLimit = 100, Window = TimeSpan.FromMinutes(1) }));
+            factory: _ => new FixedWindowRateLimiterOptions { AutoReplenishment = true, PermitLimit = 50000, Window = TimeSpan.FromMinutes(1) }));
 });
 
 var app = builder.Build();
