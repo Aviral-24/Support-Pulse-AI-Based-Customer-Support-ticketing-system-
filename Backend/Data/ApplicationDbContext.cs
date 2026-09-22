@@ -23,6 +23,7 @@ public class ApplicationDbContext : DbContext
         base.OnModelCreating(modelBuilder);
         
         // Ye line PostgreSQL me vector extension load karegi
+      //  modelBuilder.HasPostgresExtension("vector");
         modelBuilder.HasPostgresExtension("vector");
     }
 }
