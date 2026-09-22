@@ -14,7 +14,7 @@ namespace Backend.Services;
 public class AwsS3StorageService : IStorageService
 {
     private readonly IAmazonS3 _s3Client;
-    private readonly string _bucketName;
+    private readonly string _bucketName = "support-pulse-files"; // Default bucket name, can be overridden by configuration
     
     // File Validation Rules
     private readonly string[] _allowedExtensions = { ".jpg", ".jpeg", ".png", ".pdf", ".mp3", ".wav" };
