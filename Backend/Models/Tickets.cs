@@ -1,6 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using Pgvector;
+using Pgvector; // 'PgVector' ya 'Pgvector' jo aapke package me ho
 
 namespace Backend.Models;
 
@@ -19,18 +19,18 @@ public class Ticket
     public string? ImageUrl { get; set; }
 
     // --- DAY 4: NEW AI FIELDS ---
-    public string? AiTranscription { get; set; } // Audio to text
-    public string? AiImageAnalysis { get; set; } // Vision analysis
-    public string? AiSentiment { get; set; } // Happy, Angry, Neutral
-    public string? AiSummary { get; set; } // Short summary
+    public string? AiTranscription { get; set; } 
+    public string? AiImageAnalysis { get; set; } 
+    public string? AiSentiment { get; set; } 
+    public string? AiSummary { get; set; } 
 
     public string? AiCategory { get; set; }
-    public string? SuggestedResponse { get; set; } // RAG generated response
+    public string? SuggestedResponse { get; set; } 
  
-    // Embeddings (Vector Search ke liye - 384 dimensions for HuggingFace MiniLM)
+    // aur TypeName me 'vector(384)' laga diya Postgres migrations ke liye.
     [Column(TypeName = "vector(384)")]
     public Vector? Embedding { get; set; }
-    
+
     // Relationships & Timestamps
     public int CustomerId { get; set; }
     public User? Customer { get; set; }
