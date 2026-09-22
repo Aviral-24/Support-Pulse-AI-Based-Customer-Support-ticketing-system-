@@ -39,7 +39,7 @@ builder.Services.AddScoped<SupportPulseMcpServer>();
 
 builder.WebHost.UseSentry(options =>
 {
-    options.Dsn = "https://examplePublicKey@o0.ingest.sentry.io/0"; 
+   // options.Dsn = "https://examplePublicKey@o0.ingest.sentry.io/0"; 
     options.Debug = true;
     options.TracesSampleRate = 1.0; 
 });
@@ -151,7 +151,11 @@ builder.Services.AddRateLimiter(options =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment()) { app.UseSwagger(); app.UseSwaggerUI(); }
+//if (app.Environment.IsDevelopment()) { app.UseSwagger(); app.UseSwaggerUI(); }
+
+ // for live GCP url
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseSerilogRequestLogging(); 
 app.UseHttpsRedirection();
