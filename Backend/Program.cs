@@ -39,7 +39,7 @@ builder.Services.AddScoped<SupportPulseMcpServer>();
 
 builder.WebHost.UseSentry(options =>
 {
-   // options.Dsn = "https://examplePublicKey@o0.ingest.sentry.io/0"; 
+    options.Dsn = ""; 
     options.Debug = true;
     options.TracesSampleRate = 1.0; 
 });
