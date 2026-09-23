@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Backend.Data; 
 using Backend.Services;
-using Backend.Services.Async; // 🔥 FIX: Ye line miss thi!
+using Backend.Services.Async; 
 using Backend.Models;
 
 namespace Backend.Workers;
@@ -45,7 +45,7 @@ public class TicketProcessingWorker : BackgroundService
                 
                 string finalDescription = ticket.Description ?? "";
 
-                // 🔥 AUDIO TRANSCRIPTION (CRASH-PROOF)
+                //AUDIO TRANSCRIPTION (CRASH-PROOF)
                 if (!string.IsNullOrEmpty(ticket.AudioUrl))
                 {
                     try 
@@ -69,7 +69,7 @@ public class TicketProcessingWorker : BackgroundService
                         finalDescription = $"{finalDescription}\n\n[⚠️ Audio Error]: {audioEx.Message}";
                     }
                 }
-                // 🔥 NEW: IMAGE VISION LOGIC (Auto-Pilot me add kiya)
+                //  IMAGE VISION LOGIC (Auto-Pilot me add kiya)
                 if (!string.IsNullOrEmpty(ticket.ImageUrl))
                 {
                     try 
@@ -106,13 +106,13 @@ public class TicketProcessingWorker : BackgroundService
 
                 ticket.Description = finalDescription; 
 
-                // 🔥 TEXT ANALYTICS (Summary, Sentiment, Priority)
+                //  TEXT ANALYTICS (Summary, Sentiment, Priority)
                 var aiResult = await _aiService.AnalyzeTicketAsync(ticket.Title ?? "", finalDescription);
                 ticket.AiSummary = aiResult.Summary;
                 ticket.AiSentiment = aiResult.Sentiment;
                 ticket.AiCategory = aiResult.Priority;
 
-                // 🔥 VECTOR EMBEDDINGS
+                //  VECTOR EMBEDDINGS
                 string textToEmbed = $"Title: {ticket.Title}. Details: {finalDescription}. Sentiment: {ticket.AiSentiment}";
                 ticket.Embedding = await _aiService.GenerateEmbeddingAsync(textToEmbed);
 

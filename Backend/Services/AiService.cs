@@ -176,7 +176,7 @@ public class AiService : IAIService
 
     //Image to Text (Vision AI) Logic
 
-    // 🔥 NEW: Image to Text (Vision AI) Logic - FIXED
+    // Image to Text (Vision AI) Logic - FIXED
 public async Task<string> AnalyzeImageAsync(Stream imageStream, string mimeType)
 {
     try 
@@ -186,13 +186,15 @@ public async Task<string> AnalyzeImageAsync(Stream imageStream, string mimeType)
         await imageStream.CopyToAsync(memoryStream);
         byte[] imageBytes = memoryStream.ToArray();
         
-        // 🔥 FIX 1: Lamba Base64 string Uri me daalne ki jagah direct BinaryData use karein
+        // Lamba Base64 string Uri me daalne ki jagah direct BinaryData use karein
         // Isse "URI too long" wala crash nahi hoga
         var imageContent = ChatMessageContentPart.CreateImagePart(BinaryData.FromBytes(imageBytes), mimeType);
 
-        // 🔥 FIX 2: Groq ka 90b vision model use karein (agar 11b account me available nahi hai)
-        var chatClient = _groqClient.GetChatClient("llama-3.2-90b-vision-preview");
-        
+        //  Groq ka 90b vision model use karein (agar 11b account me available nahi hai)
+       // var chatClient = _groqClient.GetChatClient("llama-3.2-90b-vision-preview");
+       // var chatClient = _groqClient.GetChatClient("llama-3.2-11b-vision-instruct");
+          var chatClient = _groqClient.GetChatClient("qwen/qwen3.8-27b");
+
         var messages = new List<ChatMessage>
         {
             new UserChatMessage(

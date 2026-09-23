@@ -107,17 +107,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddHealthChecks();
 
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
-    {
-        policy.WithOrigins("http://localhost:5173") 
-        //policy.WithOrigins("http://34.93.237.221:5173") 
-        
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials(); 
-    });
+    options.AddPolicy("AllowAll", builder =>
+        builder.WithOrigins("http://localhost:5173", "http://34.93.237.221:5173") // Localhost add karein
+               .AllowAnyMethod()
+               .AllowAnyHeader()
+               .AllowCredentials());
 });
 
 //  JWT Fallback for tests
@@ -151,18 +148,23 @@ builder.Services.AddRateLimiter(options =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment()) { app.UseSwagger(); app.UseSwaggerUI(); }
+//Middleware pipeline me exact yahi ORDER rakhein:
+app.UseRouting();
+
+app.UseCors("AllowLocalhost");
+
+// if (app.Environment.IsDevelopment()) { app.UseSwagger(); app.UseSwaggerUI(); }
 
  // for live GCP url
-// app.UseSwagger();
-// app.UseSwaggerUI();
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseSerilogRequestLogging(); 
 app.UseHttpsRedirection();
 app.UseStaticFiles(); 
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseRateLimiter();
-app.UseCors("AllowFrontend");
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseSentryTracing();
