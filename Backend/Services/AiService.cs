@@ -213,41 +213,6 @@ public async Task<string> AnalyzeImageAsync(Stream imageStream, string mimeType)
         return $"Vision AI Error: {ex.Message}";
     }
 }
-    // public async Task<string> AnalyzeImageAsync(Stream imageStream, string mimeType)
-    // {
-    //     try 
-    //     {
-    //         // Image ko bytes se Base64 Format me convert karna (AI ko images aisi hi samajh aati hain)
-    //         using var memoryStream = new MemoryStream();
-    //         await imageStream.CopyToAsync(memoryStream);
-    //         byte[] imageBytes = memoryStream.ToArray();
-    //         string base64Image = Convert.ToBase64String(imageBytes);
-            
-    //         //Data URL banana (e.g., data:image/png;base64,iVBORw0KGgo...)
-    //         string dataUrl = $"data:{mimeType};base64,{base64Image}";
-
-    //         // Groq ka Vision Model use karna
-    //         var chatClient = _groqClient.GetChatClient("llama-3.2-11b-vision-preview");
-            
-    //         //AI ko Image aur Instruction dono bhejna
-    //         var messages = new List<ChatMessage>
-    //         {
-    //             new UserChatMessage(
-    //                 ChatMessageContentPart.CreateTextPart("Analyze this screenshot attached by a user in a support ticket. Extract any error messages exactly as they appear. Briefly describe the UI or the problem visible in 2-3 sentences."),
-    //                 ChatMessageContentPart.CreateImagePart(new Uri(dataUrl))
-    //             )
-    //         };
-
-    //         var response = await chatClient.CompleteChatAsync(messages);
-    //         return response.Value.Content[0].Text;
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Console.WriteLine($"\n[WARNING] Vision AI Error: {ex.Message}");
-    //         return "Vision AI could not analyze this image.";
-    //     }
-    // }
-
     // RAG Auto-Reply Generation
     public async Task<string> GenerateDraftReplyAsync(string issueDescription, string pastSolutionsContext)
     {
