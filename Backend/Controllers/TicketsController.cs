@@ -64,13 +64,13 @@ public class TicketsController : ControllerBase
         _context.Tickets.Add(ticket);
         await _context.SaveChangesAsync();
 
-        // 🔥 TICKET QUEUE ME JAA RAHI HAI
+        // TICKET QUEUE ME JAA RAHI HAI
         await _ticketQueue.EnqueueTicketAsync(ticket.Id);
         
         return Ok(new { message = "Ticket created successfully! AI is analyzing it in the background.", ticketId = ticket.Id });
     }
 
-    // 🔥 NEW: Customer ki khud ki tickets fetch karne ke liye
+    //  Customer ki khud ki tickets fetch karne ke liye
     [HttpGet("my")]
     [Authorize(Roles = "Customer")]
     public async Task<IActionResult> GetMyTickets()
@@ -97,7 +97,7 @@ public class TicketsController : ControllerBase
 
     [HttpGet("{id}")]
 
-    [Authorize(Roles = "Admin")] // 🔥 Agent hata diya
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetTicket(int id)
     {
         var ticket = await _context.Tickets.FindAsync(id);
@@ -222,124 +222,6 @@ public class TicketsController : ControllerBase
         }
     }
 
-    // // 🔥 THE SILVER BULLET: Direct AI Test Endpoint
-    // [HttpGet("{id}/force-ai-test")]
-    // [Authorize] 
-    // public async Task<IActionResult> ForceAiTest(int id, [FromServices] IAIService _aiService)
-    // {
-    //     var ticket = await _context.Tickets.FindAsync(id);
-    //     if (ticket == null) return NotFound("Ticket not found.");
-
-    //     try
-    //     {
-    //         // 1. Text Analytics (Groq)
-    //         var aiResult = await _aiService.AnalyzeTicketAsync(ticket.Title ?? "", ticket.Description ?? "");
-    //         ticket.AiSummary = aiResult.Summary;
-    //         ticket.AiSentiment = aiResult.Sentiment;
-
-    //         // 2. Vector Embeddings (HuggingFace)
-    //         string textToEmbed = $"Title: {ticket.Title}. Details: {ticket.Description}. Sentiment: {ticket.AiSentiment}";
-    //         ticket.Embedding = await _aiService.GenerateEmbeddingAsync(textToEmbed);
-
-    //         ticket.Status = "In Progress";
-    //         await _context.SaveChangesAsync(); // Database me vectors save!
-
-    //         return Ok(new { 
-    //             message = "🔥 AI Enrichment SUCCESSFUL! Vectors are saved to Database.", 
-    //             summary = ticket.AiSummary, 
-    //             sentiment = ticket.AiSentiment 
-    //         });
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         return StatusCode(500, new { message = "AI API Failed", error = ex.Message });
-    //     }
-    // }
-
-    // // 🔥 THE SILVER BULLET: Direct AI Test Endpoint (UPDATED FOR CASE 3)
-    // [HttpGet("{id}/force-ai-test")]
-    // [Authorize] 
-    // public async Task<IActionResult> ForceAiTest(int id, [FromServices] IAIService _aiService, [FromServices] IStorageService _storageService)
-    // {
-    //     var ticket = await _context.Tickets.FindAsync(id);
-    //     if (ticket == null) return NotFound("Ticket not found.");
-
-    //     try
-    //     {
-    //         string finalDescription = ticket.Description ?? "";
-
-    //         // // 1. 🔥 AUDIO TRANSCRIPTION LOGIC (CASE 3 FIX)
-    //         // if (!string.IsNullOrEmpty(ticket.AudioUrl))
-    //         // {
-    //         //     // MinIO se file ka temporary URL nikal kar download karein
-    //         //     var audioDownloadUrl = _storageService.GenerateSignedUrl(ticket.AudioUrl);
-    //         //     using var httpClient = new HttpClient();
-    //         //     var audioBytes = await httpClient.GetByteArrayAsync(audioDownloadUrl);
-    //         //     using var audioStream = new MemoryStream(audioBytes);
-
-    //         //     // Whisper AI ko bhejein
-    //         //     string transcript = await _aiService.TranscribeAudioAsync(audioStream, "audio.wav");
-
-    //         //     // Transcript ko original description ke niche jod dein
-    //         //     finalDescription = $"{finalDescription}\n\n[🎙️ Audio Transcript]: {transcript}";
-    //         //     ticket.Description = finalDescription; 
-    //         // }
-
-    //         // 1. 🔥 AUDIO TRANSCRIPTION LOGIC (CASE 3 FIX)
-    //         if (!string.IsNullOrEmpty(ticket.AudioUrl))
-    //         {
-    //             var audioDownloadUrl = _storageService.GenerateSignedUrl(ticket.AudioUrl);
-                
-    //             // 🔥 DOCKER NETWORK FIX: Agar URL me 'localhost' hai toh Docker container ka actual naam use karein
-    //             audioDownloadUrl = audioDownloadUrl.Replace("localhost", "support-pulse-s3-minio-1")
-    //                                                .Replace("127.0.0.1", "support-pulse-s3-minio-1");
-
-    //             // 🔥 SSL BYPASS FIX: Docker ke SSL errors ko ignore karne ke liye handler add kiya
-    //             var handler = new HttpClientHandler 
-    //             { 
-    //                 ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true 
-    //             };
-    //             using var httpClient = new HttpClient(handler);
-                
-    //             var audioBytes = await httpClient.GetByteArrayAsync(audioDownloadUrl);
-    //             using var audioStream = new MemoryStream(audioBytes);
-
-    //             // Whisper AI ko bhejein
-    //             string transcript = await _aiService.TranscribeAudioAsync(audioStream, "audio.wav");
-
-    //             // Transcript ko original description ke niche jod dein
-    //             finalDescription = $"{finalDescription}\n\n[🎙️ Audio Transcript]: {transcript}";
-    //             ticket.Description = finalDescription; 
-    //         }
-
-    //         // 2. Text Analytics (Groq) - Ab ye audio transcript ko bhi padhega!
-    //         var aiResult = await _aiService.AnalyzeTicketAsync(ticket.Title ?? "", finalDescription);
-    //         ticket.AiSummary = aiResult.Summary;
-    //         ticket.AiSentiment = aiResult.Sentiment;
-    //         ticket.AiCategory = aiResult.Priority; // Priority save kar rahe hain
-
-    //         // 3. Vector Embeddings (HuggingFace)
-    //         string textToEmbed = $"Title: {ticket.Title}. Details: {finalDescription}. Sentiment: {ticket.AiSentiment}";
-    //         ticket.Embedding = await _aiService.GenerateEmbeddingAsync(textToEmbed);
-
-    //         ticket.Status = "In Progress";
-    //         await _context.SaveChangesAsync(); 
-
-    //         return Ok(new { 
-    //             message = "🔥 Audio Transcription & AI Enrichment SUCCESSFUL!", 
-    //             transcriptAdded = !string.IsNullOrEmpty(ticket.AudioUrl),
-    //             updatedDescription = ticket.Description,
-    //             summary = ticket.AiSummary, 
-    //             sentiment = ticket.AiSentiment 
-    //         });
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         return StatusCode(500, new { message = "AI API Failed", error = ex.Message });
-    //     }
-    // }
-
-
 // 🔥 THE SILVER BULLET: Direct AI Test Endpoint (CRASH-PROOF VERSION)
     [HttpGet("{id}/force-ai-test")]
     [Authorize] 
@@ -352,14 +234,14 @@ public class TicketsController : ControllerBase
         {
             string finalDescription = ticket.Description ?? "";
 
-            // 1. 🔥 AUDIO TRANSCRIPTION LOGIC (CASE 3 FIX)
+            // AUDIO TRANSCRIPTION LOGIC (CASE 3 FIX)
             if (!string.IsNullOrEmpty(ticket.AudioUrl))
             {
                 try 
                 {
                     var audioDownloadUrl = _storageService.GenerateSignedUrl(ticket.AudioUrl);
                     
-                    // 🔥 MAIN FIX: Container name lagaya aur FORCEFULLY 'https' ko 'http' kiya
+                    // Container name lagaya aur FORCEFULLY 'https' ko 'http' kiya
                     audioDownloadUrl = audioDownloadUrl.Replace("localhost", "support-pulse-s3-minio-1")
                                                        .Replace("127.0.0.1", "support-pulse-s3-minio-1")
                                                        .Replace("https://", "http://"); 

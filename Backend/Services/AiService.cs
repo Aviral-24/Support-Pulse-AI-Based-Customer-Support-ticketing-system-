@@ -40,7 +40,7 @@ public class AiService : IAIService
 
     public async Task<(string Summary, string Sentiment, string Priority)> AnalyzeTicketAsync(string title, string description)
     {
-        // 🔥 UPDATE: Aapke screenshot ke according exact model name daal diya gaya hai
+        // Aapke screenshot ke according exact model name daal diya gaya hai
         var chatClient = _groqClient.GetChatClient("openai/gpt-oss-120b");
         
         // string prompt = $@"Analyze this support ticket and return strict JSON format with keys: summary, sentiment (Happy/Angry/Neutral), priority (High/Medium/Low).
@@ -53,7 +53,6 @@ public class AiService : IAIService
     //     sentiment (Happy/Angry/Neutral/Appreciative), 
     //      priority (High/Medium/Low). 
     //   Note: If the user is thanking the team or expressing satisfaction, classify sentiment as Happy.
-
     //   Title: {title}
     //    Description: {description}";
 
@@ -105,7 +104,7 @@ public class AiService : IAIService
         }
         catch (Exception ex)
         {
-            // 🔥 Agar ISP/Wi-Fi HuggingFace ko block kare, toh server crash hone se bachayega
+            // Agar ISP/Wi-Fi HuggingFace ko block kare, toh server crash hone se bachayega
             Console.WriteLine($"\n[WARNING] HuggingFace Network Blocked: {ex.Message}");
             Console.WriteLine("Generating a safe fallback vector to prevent application crash...");
             
@@ -115,32 +114,6 @@ public class AiService : IAIService
             return new Vector(fallback);
         }
     }
-
-    // public async Task<string> TranscribeAudioAsync(Stream audioStream, string fileName)
-    // {
-    //     var groqKey = _configuration["Groq:ApiKey"];
-    //     using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.groq.com/openai/v1/audio/transcriptions");
-    //     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", groqKey);
-
-    //     using var content = new MultipartFormDataContent();
-    //     var fileContent = new StreamContent(audioStream);
-    //     fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-        
-    //     content.Add(fileContent, "file", fileName);
-        
-    //     // Aapke dusre screenshot me 'whisper-large-v3' clearly visible hai, isliye ye perfectly chalega
-    //     content.Add(new StringContent("whisper-large-v3"), "model");
-    //     content.Add(new StringContent("en"), "language");
-
-    //     request.Content = content;
-    //     var response = await _httpClient.SendAsync(request);
-        
-    //     response.EnsureSuccessStatusCode();
-
-    //     var jsonResponse = await response.Content.ReadAsStringAsync();
-    //     using var doc = JsonDocument.Parse(jsonResponse);
-    //     return doc.RootElement.GetProperty("text").GetString() ?? "";
-    // }
 
     public async Task<string> TranscribeAudioAsync(Stream audioStream, string fileName)
     {
@@ -175,8 +148,6 @@ public class AiService : IAIService
     }
 
     //Image to Text (Vision AI) Logic
-
-    // Image to Text (Vision AI) Logic - FIXED
 public async Task<string> AnalyzeImageAsync(Stream imageStream, string mimeType)
 {
     try 
@@ -220,6 +191,7 @@ public async Task<string> AnalyzeImageAsync(Stream imageStream, string mimeType)
         
         string prompt = $@"You are an expert customer support agent. 
         A customer has submitted the following issue:
+
         '{issueDescription}'
 
         Here is how similar issues were successfully resolved in the past:
