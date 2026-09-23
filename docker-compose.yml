@@ -40,7 +40,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5215:8080" # Container internal 8080 mapped to local 5215
-    dns:               # 🔥 FIX 1: HUGGINGFACE DNS ERROR RESOLVED
+    dns:               
       - 1.1.1.1
       - 1.0.0.1
     environment:
@@ -53,9 +53,11 @@ services:
       - Jwt__Issuer=SupportPulseAPI
       - Jwt__Audience=SupportPulseClient
       
-      # AI API Keys
-    - Groq__ApiKey=YOUR_GROQ_API_KEY
-    - HuggingFace__ApiKey=YOUR_HUGGINGFACE_API_KEY
+# AI API Keys
+      - Groq__ApiKey=${GROQ_API_KEY}
+      - HuggingFace__ApiKey= ${HUGGINGFACE_API_KEY}
+      
+
       # Local S3 Config
       - AWS__BucketName=support-pulse-files
     depends_on:

@@ -1,5 +1,7 @@
 Backend/appsettings.Development.json
 .env
+.env.*
+!.env.example
 [Bb]in/
 [Oo]bj/
 Backend/wwwroot/uploads/

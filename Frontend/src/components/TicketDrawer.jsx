@@ -6,16 +6,15 @@ import axios from 'axios';
 export default function TicketDrawer({ ticket, isOpen, onClose, agentToken, onTicketUpdated }) {
   const [updating, setUpdating] = useState(false);
   const [newStatus, setNewStatus] = useState(ticket?.status || 'Open');
-
-  // Drawer agar open nahi hai toh kuch render mat karo
+ 
   if (!isOpen || !ticket) return null;
 
   const handleStatusUpdate = async () => {
     setUpdating(true);
     try {
       // API call to update status (PUT request)
-           //await axios.put(`http://localhost:5215/api/v1/Tickets/${ticket.id}/status`, 
-         await axios.put(`http://34.93.237.221:5215/api/v1/Tickets/${ticket.id}/status`, 
+           await axios.put(`http://localhost:5215/api/v1/Tickets/${ticket.id}/status`, 
+          // await axios.put(`http://34.93.237.221:5215/api/v1/Tickets/${ticket.id}/status`, 
         { status: newStatus },
         { headers: { Authorization: `Bearer ${agentToken}` } }
       );

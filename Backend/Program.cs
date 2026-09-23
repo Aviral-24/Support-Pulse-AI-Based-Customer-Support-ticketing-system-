@@ -28,7 +28,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 QuestPDF.Settings.License = LicenseType.Community;
 
-// ✅ Static Logger Hata Diya (Parallel xUnit test crashes fix)
+//  Static Logger Hata Diya (Parallel xUnit test crashes fix)
 builder.Host.UseSerilog((context, services, configuration) => configuration
     .ReadFrom.Configuration(context.Configuration)
     .ReadFrom.Services(services)
@@ -60,7 +60,7 @@ builder.Services.AddHttpClient("OpenAIClient")
         options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(30);
     });
 
-// ✅ Redis, DB, aur JWT ke liye Fallback strings add ki
+//  Redis, DB, aur JWT ke liye Fallback strings add ki
 var redisConn = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp => 
     ConnectionMultiplexer.Connect(redisConn + ",abortConnect=false")
@@ -111,8 +111,8 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        //policy.WithOrigins("http://localhost:5173") 
-        policy.WithOrigins("http://34.93.237.221:5173") 
+        policy.WithOrigins("http://localhost:5173") 
+        //policy.WithOrigins("http://34.93.237.221:5173") 
         
               .AllowAnyHeader()
               .AllowAnyMethod()
@@ -120,7 +120,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// ✅ JWT Fallback for tests
+//  JWT Fallback for tests
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "test_issuer";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "test_audience";
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "super_secret_fallback_key_for_testing_purposes_12345!";
@@ -151,11 +151,11 @@ builder.Services.AddRateLimiter(options =>
 
 var app = builder.Build();
 
-//if (app.Environment.IsDevelopment()) { app.UseSwagger(); app.UseSwaggerUI(); }
+if (app.Environment.IsDevelopment()) { app.UseSwagger(); app.UseSwaggerUI(); }
 
  // for live GCP url
-app.UseSwagger();
-app.UseSwaggerUI();
+// app.UseSwagger();
+// app.UseSwaggerUI();
 
 app.UseSerilogRequestLogging(); 
 app.UseHttpsRedirection();
