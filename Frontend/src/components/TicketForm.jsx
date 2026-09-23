@@ -16,7 +16,7 @@ export default function TicketForm() {
 
   const { user } = useAuth();
 
-  // 🎨 Dropdown ka color change karne wala function
+  //  Dropdown ka color change karne wala function
   const getCategoryColor = (cat) => {
     if (cat === 'High') return 'bg-red-50 text-red-700 border-red-300';
     if (cat === 'Medium') return 'bg-yellow-50 text-yellow-700 border-yellow-300';
@@ -36,8 +36,8 @@ export default function TicketForm() {
     if (imageFile) data.append('ImageFile', imageFile);
 
     try {
-        //const response = await axios.post('http://34.93.237.221:5215/api/v1/Tickets', data, {
-         const response = await axios.post('http://localhost:5215/api/v1/Tickets', data, {
+        const response = await axios.post('http://34.93.237.221:5215/api/v1/Tickets', data, {
+         //const response = await axios.post('http://localhost:5215/api/v1/Tickets', data, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${user.token}`

@@ -424,8 +424,8 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-               const response = await axios.post('http://localhost:5215/api/v1/Auth/login', { email, password });
-             // const response = await axios.post('http://34.93.237.221:5215/api/v1/Auth/login', { email, password });
+              // const response = await axios.post('http://localhost:5215/api/v1/Auth/login', { email, password });
+             const response = await axios.post('http://34.93.237.221:5215/api/v1/Auth/login', { email, password });
 
       
       const { token, role } = response.data;
@@ -459,7 +459,7 @@ export default function Login() {
           <form onSubmit={handleSubmit} className="w-full space-y-6"> 
             
             <div className="w-full">
-              <label className="block text-xs text-gray-300 mb-1.5 ml-3 font-semibold tracking-wider">USERNAME / EMAIL</label>
+              <label className="block text-xs text-gray-300 mb-1.5 ml-3 font-semibold tracking-wider">EMAIL</label>
               <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-white/90 text-black px-5 py-3 rounded-full outline-none focus:ring-2 focus:ring-[#84cc16] shadow-inner font-medium transition-all" 
                 placeholder="user@example.com" />

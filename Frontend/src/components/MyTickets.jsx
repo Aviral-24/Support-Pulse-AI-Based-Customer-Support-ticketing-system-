@@ -12,8 +12,8 @@ export default function MyTickets() {
   useEffect(() => {
     const fetchMyTickets = async () => {
       try {
-                  const response = await axios.get('http://localhost:5215/api/v1/Tickets/my', {
-                  //const response = await axios.get('http://34.93.237.221:5215/api/v1/Tickets/my', {
+                  //const response = await axios.get('http://localhost:5215/api/v1/Tickets/my', {
+                  const response = await axios.get('http://34.93.237.221:5215/api/v1/Tickets/my', {
           headers: { 'Authorization': `Bearer ${user.token}` }
         });
         setTickets(response.data);
