@@ -62,9 +62,7 @@ namespace Unit_Tests
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("TestScheme", "mock_token");
         }
 
-        // ==========================================
         // EXACTLY 4 REQUIRED BYPASS TESTS
-        // ==========================================
 
         [Fact]
         public async Task BypassTest1_REST_BOLA_CannotAccessOtherCustomerTicket()
