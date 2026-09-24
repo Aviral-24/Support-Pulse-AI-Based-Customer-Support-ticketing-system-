@@ -296,8 +296,7 @@ public class TicketsController : ControllerBase
         }
     }
 
-    // 🔥 THE RAG ENDPOINT: Auto-Generate Reply based on Vector DB
-    [HttpPost("{id}/draft-reply")]
+[HttpPost("{id}/draft-reply")]
     [Authorize]
     public async Task<IActionResult> GenerateDraftReply(int id, [FromServices] IAIService _aiService)
     {
@@ -307,25 +306,49 @@ public class TicketsController : ControllerBase
 
         try
         {
-            // 1. RETRIEVE: Vector DB me purani RESOLVED tickets dhoondo jo is issue se milti-julti hon
-            var similarResolvedTickets = await _context.Tickets
-                .Where(t => t.Id != id && t.Status == "Resolved" && t.Embedding != null)
-                .OrderBy(t => t.Embedding!.L2Distance(ticket.Embedding)) // PgVector Semantic Search
-                .Take(2) // Top 2 sabse accurate solutions
+            //RETRIEVE KNOWLEDGE BASE (FAQs) - Ye pehle missing tha!
+            // Pehle official company policies (FAQs) me vector search karo
+            var relevantFaqs = await _context.Set<KnowledgeBase>()
+                .Where(k => k.Embedding != null)
+                .OrderBy(k => k.Embedding!.L2Distance(ticket.Embedding)) // PgVector Semantic Search
+                .Take(2) // Top 2 accurate rules
                 .ToListAsync();
 
-            // 2. AUGMENT: Un solutions ka text combine karo
+            // 2. RETRIEVE PAST RESOLVED TICKETS
+            // Uske baad past resolved tickets me search karo
+            var similarResolvedTickets = await _context.Tickets
+                .Where(t => t.Id != id && t.Status == "Resolved" && t.Embedding != null)
+                .OrderBy(t => t.Embedding!.L2Distance(ticket.Embedding)) 
+                .Take(2)
+                .ToListAsync();
+
+            // 3. AUGMENT: Dono contexts ko combine karke ek strong prompt banao
             string context = "";
-            foreach (var t in similarResolvedTickets)
+            
+            if (relevantFaqs.Any())
             {
-                context += $"- Past Issue: {t.Title}\n- Details & Solution: {t.Description}\n\n";
+                context += "--- OFFICIAL KNOWLEDGE BASE (STRICT POLICIES) ---\n";
+                foreach (var faq in relevantFaqs)
+                {
+                    context += $"- Rule/FAQ: {faq.Question}\n- Action to Take: {faq.Answer}\n\n";
+                }
             }
 
-            if (string.IsNullOrEmpty(context)) {
-                context = "No similar resolved past tickets found in the database.";
+            if (similarResolvedTickets.Any())
+            {
+                context += "--- PAST SIMILAR TICKETS ---\n";
+                foreach (var t in similarResolvedTickets)
+                {
+                    context += $"- Past Issue: {t.Title}\n- Solution Used: {t.Description}\n\n";
+                }
             }
 
-            // 3. GENERATE: Groq AI ko context bhej kar email draft karwao
+            if (string.IsNullOrEmpty(context)) 
+            {
+                context = "No specific rules or past tickets found. Write a polite acknowledgment saying the team is looking into it.";
+            }
+
+            // 4. GENERATE: Groq AI ko context bhej kar email draft karwao
             string draft = await _aiService.GenerateDraftReplyAsync(ticket.Description ?? ticket.Title ?? "", context);
 
             return Ok(new { draftReply = draft });

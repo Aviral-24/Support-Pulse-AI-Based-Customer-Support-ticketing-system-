@@ -2,34 +2,39 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Backend.Data;
 using Backend.Models;
+using Backend.DTOs;
+using Backend.Services; // IAIService ke liye ye namespace add kiya gaya hai
 
-
-// Agar aapke DbContext ya Models kisi aur folder me hain, toh unke using statement yahan add kar lena
-// example: using SupportPulse.Data;
-
-namespace SupportPulse.Controllers
+namespace Backend.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]
     [Authorize(Roles = "Admin")]
     public class KnowledgeBaseController : ControllerBase
     {
-        // Note: ApplicationDbContext ko apne actual DB context ke naam se replace kar lena agar alag hai
         private readonly ApplicationDbContext _context;
+        private readonly IAIService _aiService; // 1. AI Service ka variable
 
-        public KnowledgeBaseController(ApplicationDbContext context)
+        // 2. Constructor me IAIService ko inject kiya
+        public KnowledgeBaseController(ApplicationDbContext context, IAIService aiService)
         {
             _context = context;
+            _aiService = aiService;
         }
 
         [HttpPost]
         public async Task<IActionResult> AddFaq([FromBody] FaqDto dto)
         {
+            // 3. Question aur Answer ko mila kar vector generate karna
+            string textToVectorize = $"Question: {dto.Question} Answer: {dto.Answer}";
+            var generatedEmbedding = await _aiService.GenerateEmbeddingAsync(textToVectorize);
+
             var faq = new KnowledgeBase
             { 
                 Question = dto.Question, 
                 Answer = dto.Answer,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                Embedding = generatedEmbedding
             };
             
             _context.Set<KnowledgeBase>().Add(faq);
@@ -49,12 +54,4 @@ namespace SupportPulse.Controllers
             return Ok(new { Message = "FAQ deleted." });
         }
     }
-
-    public class FaqDto
-    {
-        public string Question { get; set; } = string.Empty;
-        public string Answer { get; set; } = string.Empty;
-    }
-
- 
 }
