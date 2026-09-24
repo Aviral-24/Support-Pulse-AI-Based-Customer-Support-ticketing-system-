@@ -4,12 +4,12 @@ import { FormData } from 'https://jslib.k6.io/formdata/0.0.2/index.js';
 
 export const options = {
  
-  //  100 Users Load Test (Stable Baseline)
-  // stages: [
-  //   { duration: '10s', target: 50 },
-  //   { duration: '30s', target: 100 },
-  //   { duration: '10s', target: 0 },
-  // ],
+   // 100 Users Load Test (Stable Baseline)
+  stages: [
+    { duration: '10s', target: 50 },
+    { duration: '30s', target: 100 },
+    { duration: '10s', target: 0 },
+  ],
 
   //  //500 Users Load Test (Moderate Load)
   // stages: [
@@ -25,12 +25,12 @@ export const options = {
   //   { duration: '1m', target: 0 },
   // ],
 
- // 1,500 Users Load Test
-  stages: [
-    { duration: '1m', target: 750 },
-    { duration: '2m', target: 1500 },
-    { duration: '1m', target: 0 },
-  ],
+//  // 1,500 Users Load Test
+//   stages: [
+//     { duration: '1m', target: 750 },
+//     { duration: '2m', target: 1500 },
+//     { duration: '1m', target: 0 },
+//   ],
 
   ////  2,000 Users Load Test
   // stages: [

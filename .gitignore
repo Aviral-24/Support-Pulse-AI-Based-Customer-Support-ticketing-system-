@@ -5,3 +5,4 @@ Backend/appsettings.Development.json
 [Bb]in/
 [Oo]bj/
 Backend/wwwroot/uploads/
+Frontend/node_modules/
