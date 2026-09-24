@@ -21,7 +21,7 @@ public static class DataSeeder
             {
                 Name = "Super Admin",
                 Email = "admin@supportpulse.com",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123!"),
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Password@123"),
                 Role = "Admin"
             };
             dbContext.Users.Add(superAdmin);
@@ -29,7 +29,7 @@ public static class DataSeeder
         else
         {
             // Update ensures it's always fixed on restart if someone messes with it
-            superAdmin.PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123!");
+            superAdmin.PasswordHash = BCrypt.Net.BCrypt.HashPassword("Password@123");
             superAdmin.Role = "Admin";
             dbContext.Users.Update(superAdmin);
         }
