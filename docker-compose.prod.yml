@@ -4,52 +4,59 @@ services:
   redis:
     image: redis:alpine
     restart: always
-    # PORT EXPOSE NAHI KIYA (Internal network only)
 
   s3-minio:
     image: minio/minio
     command: server /data --console-address ":9001"
     restart: always
+    env_file:
+      - ./.env
     environment:
-      - MINIO_ROOT_USER=${MINIO_USER:-minioadmin}
-      - MINIO_ROOT_PASSWORD=${MINIO_PASS:-minioadmin123!}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
     volumes:
       - minio_data_prod:/data
-    # Prod me sirf API port internal chahiye, par verification ke liye expose rakha hai
     ports:
-      - "9000:9000" 
+      - "9000:9000"
       - "9001:9001"
 
   db:
     image: pgvector/pgvector:pg16
     restart: always
+    env_file:
+      - ./.env
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASS:-ProdSecurePassword2026!}
-      POSTGRES_DB: SupportPulse_db
+      POSTGRES_PASSWORD: ${DB_PASS:-postgres}
+      POSTGRES_DB: ${DB_NAME:-SupportPulse_db}
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
-    # PORT 5433 EXPOSE NAHI KIYA (Internet se DB hack nahi ho payega)
 
   backend:
     build:
       context: ./Backend
       dockerfile: Dockerfile
     restart: always
+    env_file:
+      - ./.env
     ports:
-      - "5215:8080" 
+      - "5215:8080"
     dns:
       - 1.1.1.1
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=SupportPulse_db;Username=${DB_USER:-postgres};Password=${DB_PASS:-ProdSecurePassword2026!}
-      - ConnectionStrings__Redis=redis:6379,abortConnect=false
-      - Jwt__Key=${JWT_KEY:-YourVerySecureProductionJWTKey2026!@#$$}
-      - Jwt__Issuer=SupportPulseAPI
-      - Jwt__Audience=SupportPulseClient
-      - Groq__ApiKey=${GROQ_API_KEY}
-      - HuggingFace__ApiKey=${HF_API_KEY}
-      - AWS__ServiceURL=http://s3-minio:9000
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=${DB_NAME:-SupportPulse_db};Username=${DB_USER:-postgres};Password=${DB_PASS:-postgres}
+      ConnectionStrings__Redis: redis:6379,abortConnect=false
+      Jwt__Key: ${JWT_KEY:-change_me_in_env}
+      Jwt__Issuer: SupportPulseAPI
+      Jwt__Audience: SupportPulseClient
+      Groq__ApiKey: ${GROQ_API_KEY}
+      HuggingFace__ApiKey: ${HF_API_KEY}
+      AWS__AccessKey: ${MINIO_ROOT_USER:-minioadmin}
+      AWS__SecretKey: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      AWS__Region: ${AWS_REGION:-ap-south-1}
+      AWS__BucketName: ${AWS_BUCKET_NAME:-support-pulse-files}
+      AWS__ServiceURL: http://s3-minio:9000
     depends_on:
       - db
       - redis
@@ -57,7 +64,7 @@ services:
 
   frontend:
     build:
-      context: ./frontend 
+      context: ./frontend
       dockerfile: Dockerfile
     restart: always
     ports:
