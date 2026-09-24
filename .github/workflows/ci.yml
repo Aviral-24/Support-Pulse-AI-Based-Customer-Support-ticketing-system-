@@ -12,21 +12,21 @@ jobs:
 
     env:
       DB_USER: postgres
-      DB_PASS: ${{ secrets.DB_PASS }}
-      DB_NAME: ${{ secrets.DB_NAME }}
-      JWT_KEY: ${{ secrets.JWT_KEY }}
-      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-      HF_API_KEY: ${{ secrets.HF_API_KEY }}
-      MINIO_ROOT_USER: ${{ secrets.MINIO_ROOT_USER }}
-      MINIO_ROOT_PASSWORD: ${{ secrets.MINIO_ROOT_PASSWORD }}
+      DB_PASS: ${{ secrets.DB_PASS != '' && secrets.DB_PASS || 'postgres' }}
+      DB_NAME: ${{ secrets.DB_NAME != '' && secrets.DB_NAME || 'SupportPulse_db' }}
+      JWT_KEY: ${{ secrets.JWT_KEY != '' && secrets.JWT_KEY || 'change_me_in_env' }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY != '' && secrets.GROQ_API_KEY || 'test_groq_api_key' }}
+      HF_API_KEY: ${{ secrets.HF_API_KEY != '' && secrets.HF_API_KEY || 'test_hf_api_key' }}
+      MINIO_ROOT_USER: ${{ secrets.MINIO_ROOT_USER != '' && secrets.MINIO_ROOT_USER || 'minioadmin' }}
+      MINIO_ROOT_PASSWORD: ${{ secrets.MINIO_ROOT_PASSWORD != '' && secrets.MINIO_ROOT_PASSWORD || 'minioadmin' }}
 
     services:
       postgres:
         image: ankane/pgvector:latest
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: ${{ secrets.DB_PASS }}
-          POSTGRES_DB: ${{ secrets.DB_NAME }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASS != '' && secrets.DB_PASS || 'postgres' }}
+          POSTGRES_DB: ${{ secrets.DB_NAME != '' && secrets.DB_NAME || 'SupportPulse_db' }}
         ports:
           - 5433:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
@@ -54,16 +54,16 @@ jobs:
 
     - name: Apply Database Migrations
       env:
-        ConnectionStrings__DefaultConnection: "Host=localhost;Port=5433;Database=${{ secrets.DB_NAME }};Username=postgres;Password=${{ secrets.DB_PASS }}"
+        ConnectionStrings__DefaultConnection: "Host=localhost;Port=5433;Database=${{ secrets.DB_NAME != '' && secrets.DB_NAME || 'SupportPulse_db' }};Username=postgres;Password=${{ secrets.DB_PASS != '' && secrets.DB_PASS || 'postgres' }}"
       run: dotnet ef database update --project ./Backend/Backend.csproj --startup-project ./Backend/Backend.csproj
 
     - name: Run Tests
       env:
-        ConnectionStrings__DefaultConnection: "Host=localhost;Port=5433;Database=${{ secrets.DB_NAME }};Username=postgres;Password=${{ secrets.DB_PASS }}"
+        ConnectionStrings__DefaultConnection: "Host=localhost;Port=5433;Database=${{ secrets.DB_NAME != '' && secrets.DB_NAME || 'SupportPulse_db' }};Username=postgres;Password=${{ secrets.DB_PASS != '' && secrets.DB_PASS || 'postgres' }}"
         ConnectionStrings__Redis: "localhost:6379,abortConnect=false"
-        Groq__ApiKey: ${{ secrets.GROQ_API_KEY }}
-        HuggingFace__ApiKey: ${{ secrets.HF_API_KEY }}
-        Jwt__Key: ${{ secrets.JWT_KEY }}
+        Groq__ApiKey: ${{ secrets.GROQ_API_KEY != '' && secrets.GROQ_API_KEY || 'test_groq_api_key' }}
+        HuggingFace__ApiKey: ${{ secrets.HF_API_KEY != '' && secrets.HF_API_KEY || 'test_hf_api_key' }}
+        Jwt__Key: ${{ secrets.JWT_KEY != '' && secrets.JWT_KEY || 'change_me_in_env' }}
         Jwt__Issuer: "SupportPulseAPI"
         Jwt__Audience: "SupportPulseClient"
       run: dotnet test ./Unit_Tests/Unit_Tests.csproj -c Release --no-build --verbosity normal --filter "FullyQualifiedName!~TicketAiIntegrationTests"
