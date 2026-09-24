@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import Galaxy from './Galaxy';
 import { useAuth } from '../context/AuthContext';
 
 export default function TicketForm() {
@@ -36,8 +35,8 @@ export default function TicketForm() {
     if (imageFile) data.append('ImageFile', imageFile);
 
     try {
-        const response = await axios.post('http://34.93.237.221:5215/api/v1/Tickets', data, {
-         //const response = await axios.post('http://localhost:5215/api/v1/Tickets', data, {
+        //const response = await axios.post('http://34.93.237.221:5215/api/v1/Tickets', data, {
+         const response = await axios.post('http://localhost:5215/api/v1/Tickets', data, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${user.token}`
@@ -61,14 +60,6 @@ export default function TicketForm() {
 
   return (
     <div className="relative h-[calc(100vh-4rem)] overflow-y-auto overflow-x-hidden bg-slate-100">
-      <Galaxy
-        className="opacity-70"
-        density={1.1}
-        glowIntensity={0.42}
-        saturation={0.7}
-        hueShift={205}
-        rotationSpeed={0.06}
-      />
       <div className="relative z-10 max-w-2xl mx-auto p-8 bg-white/90 backdrop-blur-sm shadow-lg border border-gray-100 rounded-xl mt-10">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">Submit a Support Ticket</h2>
       
@@ -97,7 +88,7 @@ export default function TicketForm() {
           ></textarea>
         </div>
 
-        {/* 🔥 UPDATED: Category Dropdown with Colors and correct values */}
+        {/*Category Dropdown with Colors and correct values */}
         <div>
           <label className="block font-medium text-gray-700 mb-1">Priority (Category)</label>
           <select 

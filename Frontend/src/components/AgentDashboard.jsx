@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast'; 
-import Galaxy from './Galaxy';
 import { useAuth } from '../context/AuthContext';
 import { Sparkles, Search, X } from 'lucide-react';
 
@@ -32,8 +31,8 @@ export default function AgentDashboard() {
 
   const fetchTickets = async () => {
     try {
-       const response = await axios.get('http://34.93.237.221:5215/api/v1/Tickets', {
-        //const response = await axios.get('http://localhost:5215/api/v1/Tickets', {
+      //const response = await axios.get('http://34.93.237.221:5215/api/v1/Tickets', {
+        const response = await axios.get('http://localhost:5215/api/v1/Tickets', {
         headers: { 'Authorization': `Bearer ${user.token}` },
         params: { search, status: statusFilter, page, pageSize: 10 }
       });
@@ -48,8 +47,8 @@ export default function AgentDashboard() {
     setIsGeneratingReply(true);
     const loadingToast = toast.loading("🧠 Searching past solutions & drafting reply...");
     try {
-     const response = await axios.post(`http://34.93.237.221:5215/api/v1/Tickets/${ticketId}/draft-reply`, {}, {
-      //const response = await axios.post(`http://localhost:5215/api/v1/Tickets/${ticketId}/draft-reply`, {}, {
+      //const response = await axios.post(`http://34.93.237.221:5215/api/v1/Tickets/${ticketId}/draft-reply`, {}, {
+      const response = await axios.post(`http://localhost:5215/api/v1/Tickets/${ticketId}/draft-reply`, {}, {
         headers: { 'Authorization': `Bearer ${user.token}` }
       });
       setDraftReply(response.data.draftReply);
@@ -71,9 +70,8 @@ export default function AgentDashboard() {
     
     setIsAiSearching(true);
     try {
-     const response = await axios.get('http://34.93.237.221:5215/api/v1/Tickets/semantic-search', {
-
-         //const response = await axios.get('http://localhost:5215/api/v1/Tickets/semantic-search', {
+         //const response = await axios.get('http://34.93.237.221:5215/api/v1/Tickets/semantic-search', {
+        const response = await axios.get('http://localhost:5215/api/v1/Tickets/semantic-search', {
         headers: { 'Authorization': `Bearer ${user.token}` },
         params: { query: aiQuery }
       });
@@ -96,8 +94,8 @@ export default function AgentDashboard() {
 
   const updateStatus = async (id, newStatus) => {
     try {
-     await axios.put(`http://34.93.237.221:5215/api/v1/Tickets/${id}/status`, 
-      // await axios.put(`http://localhost:5215/api/v1/Tickets/${id}/status`, 
+     //await axios.put(`http://34.93.237.221:5215/api/v1/Tickets/${id}/status`, 
+       await axios.put(`http://localhost:5215/api/v1/Tickets/${id}/status`, 
         { status: newStatus },
         { headers: { 'Authorization': `Bearer ${user.token}` } }
       );
@@ -111,8 +109,8 @@ export default function AgentDashboard() {
   const addNote = async (id) => {
     if (!note.trim()) return toast.error("Note cannot be empty!");
     try {
-         await axios.post(`http://34.93.237.221:5215/api/v1/Tickets/${id}/notes`, 
-        // await axios.post(`http://localhost:5215/api/v1/Tickets/${id}/notes`, 
+        // await axios.post(`http://34.93.237.221:5215/api/v1/Tickets/${id}/notes`, 
+        await axios.post(`http://localhost:5215/api/v1/Tickets/${id}/notes`, 
         { note: note },
         { headers: { 'Authorization': `Bearer ${user.token}` } }
       );
@@ -127,8 +125,8 @@ export default function AgentDashboard() {
   const handleDownloadPdf = async (ticketId) => {
     const loadingToast = toast.loading("Generating PDF report...");
     try {
-       const response = await fetch(`http://34.93.237.221:5215/api/v1/Tickets/${ticketId}/pdf`, {
-       //const response = await fetch(`http://localhost:5215/api/v1/Tickets/${ticketId}/pdf`, {
+       //const response = await fetch(`http://34.93.237.221:5215/api/v1/Tickets/${ticketId}/pdf`, {
+       const response = await fetch(`http://localhost:5215/api/v1/Tickets/${ticketId}/pdf`, {
             headers: { 'Authorization': `Bearer ${user.token}` }
         });
         if (!response.ok) throw new Error("PDF download failed");
@@ -171,16 +169,7 @@ export default function AgentDashboard() {
   };
 
   return (
-   
-     //  Main container se scroll hata diya (overflow-hidden kar diya)
     <div className="relative h-[calc(100vh-4rem)] overflow-hidden bg-slate-100">
-      
-      {/* 2. Galaxy Background ko absolute banakar pure pichhe fiks kar diya */}
-      <div className="absolute inset-0 pointer-events-none z-0">
-        <Galaxy className="opacity-70 h-full w-full" density={1.15} glowIntensity={0.45} saturation={0.75} hueShift={205} rotationSpeed={0.06} />
-      </div>
-      
-      {/* 3. Sirf Content wale div me scroll (overflow-y-auto) add kiya */}
       <div className="relative z-10 h-full overflow-y-auto overflow-x-hidden p-6">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-6 text-gray-800">Agent Dashboard</h2>

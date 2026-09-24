@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import Galaxy from './Galaxy';
 import { InboxIcon, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 
 export default function MyTickets() {
@@ -12,8 +11,8 @@ export default function MyTickets() {
   useEffect(() => {
     const fetchMyTickets = async () => {
       try {
-                  //const response = await axios.get('http://localhost:5215/api/v1/Tickets/my', {
-                  const response = await axios.get('http://34.93.237.221:5215/api/v1/Tickets/my', {
+                 const response = await axios.get('http://localhost:5215/api/v1/Tickets/my', {
+                  //const response = await axios.get('http://34.93.237.221:5215/api/v1/Tickets/my', {
           headers: { 'Authorization': `Bearer ${user.token}` }
         });
         setTickets(response.data);
@@ -44,8 +43,6 @@ export default function MyTickets() {
 
   return (
     <div className="relative h-[calc(100vh-4rem)] overflow-y-auto overflow-x-hidden bg-slate-100">
-      <Galaxy className="opacity-60" density={1.0} glowIntensity={0.3} saturation={0.5} hueShift={180} />
-      
       <div className="relative z-10 p-6 max-w-4xl mx-auto mt-6">
         <h2 className="text-3xl font-bold mb-6 text-gray-800">My Support Tickets</h2>
 
