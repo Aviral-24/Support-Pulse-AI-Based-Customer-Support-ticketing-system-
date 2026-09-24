@@ -192,8 +192,11 @@ if (!app.Environment.IsEnvironment("Testing"))
     }
 }
 
-// Seed default admin account cleanly
-app.SeedSuperAdmin();
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    // Seed default admin account cleanly
+    app.SeedSuperAdmin();
+}
 
 app.Run();
 

@@ -6,11 +6,15 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Backend.Data;
 using Xunit;
 
 namespace Unit_Tests
@@ -44,8 +48,15 @@ namespace Unit_Tests
         {
             _client = factory.WithWebHostBuilder(builder =>
             {
+                builder.UseEnvironment("Testing");
+
                 builder.ConfigureTestServices(services =>
                 {
+                    services.RemoveAll<DbContextOptions<ApplicationDbContext>>();
+                    services.RemoveAll<ApplicationDbContext>();
+                    services.AddDbContext<ApplicationDbContext>(options =>
+                        options.UseInMemoryDatabase("SupportPulse_TestDb"));
+
                     services.AddAuthentication(options =>
                     {
                         options.DefaultAuthenticateScheme = "TestScheme";
