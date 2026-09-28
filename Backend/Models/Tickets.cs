@@ -35,4 +35,6 @@ public class Ticket
     public int CustomerId { get; set; }
     public User? Customer { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public string? RagDraftReply { get; set; }
+    public ICollection<TicketNote> Notes { get; set; } = new List<TicketNote>();
 }

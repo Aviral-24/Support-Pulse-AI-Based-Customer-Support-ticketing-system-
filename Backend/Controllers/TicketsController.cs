@@ -178,7 +178,10 @@ public class TicketsController : ControllerBase
     [Authorize]
     public async Task<IActionResult> DownloadTicketPdf(int id, [FromServices] ITicketPdfGenerator _pdfGenerator, [FromServices] IAuditService _auditService)
     {
-        var ticket = await _context.Tickets.Include(t => t.Customer).FirstOrDefaultAsync(t => t.Id == id);
+        var ticket = await _context.Tickets
+        .Include(t => t.Customer)
+        .Include(t => t.Notes)
+        .FirstOrDefaultAsync(t => t.Id == id);
         if (ticket == null) return NotFound("Ticket not found.");
 
         try 
@@ -350,6 +353,10 @@ public class TicketsController : ControllerBase
 
             // 4. GENERATE: Groq AI ko context bhej kar email draft karwao
             string draft = await _aiService.GenerateDraftReplyAsync(ticket.Description ?? ticket.Title ?? "", context);
+            
+          // NAYA CODE: Draft ko ticket me save karein taaki PDF read kar sake
+    ticket.RagDraftReply = draft; 
+    await _context.SaveChangesAsync();
 
             return Ok(new { draftReply = draft });
         }

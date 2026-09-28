@@ -4,9 +4,15 @@ namespace Backend.DTOs;
 
 public class CreateTicketDto
 {
-    [Required]
+  // Strictly check karega ki empty ya null na ho, aur length limits cross na ho
+    [Required(ErrorMessage = "Title is required and cannot be empty.", AllowEmptyStrings = false)]
+    [MinLength(5, ErrorMessage = "Title must be at least 5 characters long.")]
+    [MaxLength(100, ErrorMessage = "Title cannot exceed 100 characters.")]
     public string Title { get; set; } = string.Empty;
-    [Required]
+
+    [Required(ErrorMessage = "Description is required.", AllowEmptyStrings = false)]
+    [MinLength(5, ErrorMessage = "Description must be at least 5 characters long.")]
+    [MaxLength(2000, ErrorMessage = "Description is too long.")]
     public string Description { get; set; } = string.Empty;
     public string Category { get; set; } = "General";
 

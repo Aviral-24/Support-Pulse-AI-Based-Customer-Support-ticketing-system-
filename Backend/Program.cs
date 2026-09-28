@@ -107,15 +107,30 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddHealthChecks();
 
+//  CORS policy for production (GCP) 
+// builder.Services.AddCors(options =>
+// {
+//     options.AddPolicy("AllowAll", builder =>
+//         builder.WithOrigins("http://34.93.237.221:5173") 
+//                .AllowAnyMethod()
+//                .AllowAnyHeader()
+//                .AllowCredentials());
+// });
 
+
+ //CORS policy for React frontend
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", builder =>
-        builder.WithOrigins("http://localhost:5173", "http://34.93.237.221:5173") // Localhost add karein
-               .AllowAnyMethod()
-               .AllowAnyHeader()
-               .AllowCredentials());
-});
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            // policy.WithOrigins("http://localhost:5173")
+            policy.WithOrigins("https://aviral-supportpulse.duckdns.org") // React frontend ka URL
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+
+ });       
 
 //  JWT Fallback for tests
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "test_issuer";
@@ -151,20 +166,22 @@ var app = builder.Build();
 //Middleware pipeline me exact yahi ORDER rakhein:
 app.UseRouting();
 
-app.UseCors("AllowLocalhost");
+// app.UseCors("AllowLocalhost");
 
- if (app.Environment.IsDevelopment()) { app.UseSwagger(); app.UseSwaggerUI(); }
+//  if (app.Environment.IsDevelopment()) { app.UseSwagger(); app.UseSwaggerUI(); }
 
-//  // for live GCP url
-// app.UseSwagger();
-// app.UseSwaggerUI();
+ // for live GCP url
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseSerilogRequestLogging(); 
 app.UseHttpsRedirection();
-app.UseStaticFiles(); 
+app.UseStaticFiles();
+app.UseRouting();
+//app.UseCors("AllowFrontend");
+app.UseCors("AllowAll");
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseRateLimiter();
-app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseSentryTracing();
