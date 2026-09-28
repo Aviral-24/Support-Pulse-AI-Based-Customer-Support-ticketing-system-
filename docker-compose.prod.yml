@@ -6,7 +6,7 @@ services:
     restart: always
 
   s3-minio:
-    image: minio/minio
+    image: coollabsio/minio:latest
     command: server /data --console-address ":9001"
     restart: always
     env_file:
