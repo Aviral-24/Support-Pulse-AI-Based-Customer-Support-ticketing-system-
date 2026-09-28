@@ -27,8 +27,8 @@ const AnalyticsDashboard = () => {
     const fetchAnalytics = async () => {
         try {
 
-                  const response = await fetch('https://aviral-supportpulse.duckdns.org/v1/Analytics/dashboard', {       
-                //const response = await fetch('http://localhost:5215/api/v1/Analytics/dashboard', {
+                //const response = await fetch('https://aviral-supportpulse.duckdns.org/v1/Analytics/dashboard', {       
+                const response = await fetch('http://localhost:5215/api/v1/Analytics/dashboard', {
                 // const response = await fetch('http://34.93.237.221:5215/api/v1/Analytics/dashboard', {
                 headers: { 
                     'Authorization': `Bearer ${user.token}` 
