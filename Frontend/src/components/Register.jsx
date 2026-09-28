@@ -2,14 +2,13 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Eye, EyeOff, LockKeyhole, UserRound, ArrowRight, Mail } from 'lucide-react';
+import { Eye, EyeOff, LockKeyhole, UserRound, Mail } from 'lucide-react';
 
 export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState('Customer');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -17,8 +16,11 @@ export default function Register() {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post('http://localhost:5215/api/v1/Auth/register', { name, email, password, role });
-      // await axios.post('http://34.93.237.221:5215/api/v1/Auth/register', { name, email, password, role });
+      
+        await axios.post('https:/aviral-supportpulse.duckdns.org/api/v1/Auth/register', { name, email, password, role: 'Customer' });
+      //await axios.post('http://localhost:5215/api/v1/Auth/register', { name, email, password, role: 'Customer' });
+    // await axios.post('http://34.93.237.221:5215/api/v1/Auth/register', { name, email, password, role: 'Customer' });
+    
       toast.success('Registration successful! Please login.');
       navigate('/login');
     } catch (error) {
@@ -74,7 +76,6 @@ export default function Register() {
                 className="h-[58px] w-full rounded-[14px] border border-[#2a4d60] bg-[#1a2d3a]/80 pl-12 pr-4 text-base text-white placeholder:text-[#b8c9d4] outline-none transition focus:border-[#5feaf5] focus:ring-2 focus:ring-[#5feaf5]/20"
               />
             </label>
-
             <label className="relative block">
               <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#4ce3ef]">
                 <LockKeyhole size={22} />
@@ -96,14 +97,6 @@ export default function Register() {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </label>
-
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="h-[58px] w-full rounded-[14px] border border-[#2a4d60] bg-[#1a2d3a]/80 px-4 text-base text-white outline-none transition focus:border-[#5feaf5] focus:ring-2 focus:ring-[#5feaf5]/20"
-            >
-              <option value="Customer" className="text-slate-800">Customer</option>
-            </select>
 
             <button
               type="submit"
