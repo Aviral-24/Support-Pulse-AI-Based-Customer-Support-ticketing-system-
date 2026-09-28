@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Backend.Models;
 using Pgvector.EntityFrameworkCore;
+using Pgvector;
 
 namespace Backend.Data;
 
@@ -17,13 +18,18 @@ public class ApplicationDbContext : DbContext
     public DbSet<KnowledgeBase> KnowledgeBases => Set<KnowledgeBase>();
     public DbSet<AuditLog> AuditLogs { get; set; }
 
-    // Is method ko class ke andar rakhna zaroori hai
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         
-        // Ye line PostgreSQL me vector extension load karegi
-      //  modelBuilder.HasPostgresExtension("vector");
-        modelBuilder.HasPostgresExtension("vector");
+        if (Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory")
+        {
+            modelBuilder.Ignore<Vector>();
+        }
+        else
+        {
+            // Normal Production/Development ke liye Postgres extension
+            modelBuilder.HasPostgresExtension("vector");
+        }
     }
 }
