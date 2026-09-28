@@ -28,7 +28,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 QuestPDF.Settings.License = LicenseType.Community;
 
-//  Static Logger Hata Diya (Parallel xUnit test crashes fix)
 builder.Host.UseSerilog((context, services, configuration) => configuration
     .ReadFrom.Configuration(context.Configuration)
     .ReadFrom.Services(services)
@@ -60,7 +59,6 @@ builder.Services.AddHttpClient("OpenAIClient")
         options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(30);
     });
 
-//  Redis, DB, aur JWT ke liye Fallback strings add ki
 var redisConn = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp => 
     ConnectionMultiplexer.Connect(redisConn + ",abortConnect=false")
@@ -68,17 +66,13 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 
 builder.Services.AddHttpClient<IAIService, AiService>();
 builder.Services.AddSingleton<ITicketQueue, RedisTicketQueue>(); 
-
-// Purane AiEnrichmentWorker ko hata diya taaki conflict na ho, aur naya Crash-Proof worker laga diya
 builder.Services.AddHostedService<TicketProcessingWorker>();
-
 builder.Services.AddHttpContextAccessor();
 
 var s3Config = new AmazonS3Config { ServiceURL = "http://s3-minio:9000", ForcePathStyle = true, UseHttp = true };
 var awsCredentials = new BasicAWSCredentials("minioadmin", "minioadmin");
 builder.Services.AddSingleton<IAmazonS3>(new AmazonS3Client(awsCredentials, s3Config));
 builder.Services.AddScoped<IStorageService, AwsS3StorageService>();
-
 builder.Services.AddScoped<ITicketPdfGenerator, TicketPdfGenerator>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 
@@ -94,10 +88,7 @@ builder.Services.AddSwaggerGen(c =>
     { new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } }, new string[] { } }});
 });
 
-
 var dbConn = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Host=localhost;Database=SupportPulse_db;Username=postgres;Password=Abhi@2080";
-
-//  Npgsql 8.0+ ke liye DataSourceBuilder me Vector map karna zaroori hai
 var dataSourceBuilder = new NpgsqlDataSourceBuilder(dbConn);
 dataSourceBuilder.UseVector();
 var dataSource = dataSourceBuilder.Build();
@@ -107,32 +98,35 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddHealthChecks();
 
-//  CORS policy for production (GCP) 
+// CORS policy definition - using SetIsOriginAllowed to bypass strict domain checks
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReact", policy =>
+    {
+        policy.SetIsOriginAllowed(origin => true) // Localhost/IP bypass ke liye sabse best
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials(); 
+    });
+});   
+
+// // Local aur GCP Live domain dono ko allow karein
 // builder.Services.AddCors(options =>
 // {
-//     options.AddPolicy("AllowAll", builder =>
-//         builder.WithOrigins("http://34.93.237.221:5173") 
-//                .AllowAnyMethod()
-//                .AllowAnyHeader()
-//                .AllowCredentials());
+//     options.AddPolicy("AllowReact", policy =>
+//     {
+//         // Local aur GCP Live domain dono ko allow karein
+//         policy.WithOrigins(
+//                 "http://localhost:5173", 
+//                 "https://aviral-supportpulse.duckdns.org" // Aapka live secure domain
+//               ) 
+//               .AllowAnyHeader()
+//               .AllowAnyMethod()
+//               .AllowCredentials(); 
+//     });
 // });
 
 
- //CORS policy for React frontend
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend",
-        policy =>
-        {
-            // policy.WithOrigins("http://localhost:5173")
-            policy.WithOrigins("https://aviral-supportpulse.duckdns.org") // React frontend ka URL
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        });
-
- });       
-
-//  JWT Fallback for tests
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "test_issuer";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "test_audience";
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "super_secret_fallback_key_for_testing_purposes_12345!";
@@ -152,7 +146,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-    // Rate Limiter
 builder.Services.AddRateLimiter(options =>
 {
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
@@ -163,23 +156,21 @@ builder.Services.AddRateLimiter(options =>
 
 var app = builder.Build();
 
-//Middleware pipeline me exact yahi ORDER rakhein:
-app.UseRouting();
+// FIX: Correct Middleware Order (Ek hi baar UseRouting)
+app.UseSerilogRequestLogging(); 
+// app.UseHttpsRedirection(); // Local dev me HTTPS redirect problems create karta hai, isliye hata diya hai
+app.UseStaticFiles();
 
-// app.UseCors("AllowLocalhost");
-
-//  if (app.Environment.IsDevelopment()) { app.UseSwagger(); app.UseSwaggerUI(); }
-
- // for live GCP url
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseSerilogRequestLogging(); 
-app.UseHttpsRedirection();
-app.UseStaticFiles();
+// 1. Pehle Routing
 app.UseRouting();
-//app.UseCors("AllowFrontend");
-app.UseCors("AllowAll");
+
+// 2. Routing ke turant baad CORS (Naam ekdum match hona chahiye)
+app.UseCors("AllowReact"); 
+
+// 3. Baaki middlewares
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseRateLimiter();
 app.UseAuthentication();
@@ -211,7 +202,6 @@ if (!app.Environment.IsEnvironment("Testing"))
 
 if (!app.Environment.IsEnvironment("Testing"))
 {
-    // Seed default admin account cleanly
     app.SeedSuperAdmin();
 }
 
