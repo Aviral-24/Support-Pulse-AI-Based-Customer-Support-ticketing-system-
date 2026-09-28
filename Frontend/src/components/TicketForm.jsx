@@ -35,7 +35,7 @@ export default function TicketForm() {
     if (imageFile) data.append('ImageFile', imageFile);
 
     try {
-         const response = await axios.post('aviral-supportpulse.duckdns.org/v1/Tickets', data, {
+         const response = await axios.post('https://aviral-supportpulse.duckdns.org/v1/Tickets', data, {
         //const response = await axios.post('http://34.93.237.221:5215/api/v1/Tickets', data, {
         // const response = await axios.post('http://localhost:5215/api/v1/Tickets', data, {
         headers: {
