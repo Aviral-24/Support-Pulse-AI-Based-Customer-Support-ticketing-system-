@@ -17,8 +17,8 @@ export default function Register() {
     setLoading(true);
     try {
       
-       // await axios.post('https://aviral-supportpulse.duckdns.org/api/v1/Auth/register', { name, email, password, role: 'Customer' });
-      await axios.post('http://localhost:5215/api/v1/Auth/register', { name, email, password, role: 'Customer' });
+        await axios.post('https://aviral-supportpulse.duckdns.org/api/v1/Auth/register', { name, email, password, role: 'Customer' });
+      // await axios.post('http://localhost:5215/api/v1/Auth/register', { name, email, password, role: 'Customer' });
     // await axios.post('http://34.93.237.221:5215/api/v1/Auth/register', { name, email, password, role: 'Customer' });
     
       toast.success('Registration successful! Please login.');
