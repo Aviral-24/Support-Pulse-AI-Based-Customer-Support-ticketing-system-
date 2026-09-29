@@ -88,7 +88,9 @@ public class TicketsController : ControllerBase
                 t.Status,
                 t.Category,
                 t.CreatedAt,
-                t.AiSummary // Agar AI ne summary banayi hai toh customer ko bhi dikhayenge
+                t.AiSummary, // Agar AI ne summary banayi hai toh customer ko bhi dikhayenge
+                t.AiTranscription // Ab transcription bhi API me return hoga
+                //t.AiImageAnalysis
             })
             .ToListAsync();
 
@@ -96,8 +98,7 @@ public class TicketsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Agent")] // Agent ko bhi single ticket dekhne ki permission honi chahiye
     public async Task<IActionResult> GetTicket(int id)
     {
         var ticket = await _context.Tickets.FindAsync(id);
@@ -108,8 +109,13 @@ public class TicketsController : ControllerBase
             ticket.Id,
             ticket.Title,
             ticket.Description,
-            ImageUrl = _storageService.GenerateSignedUrl(ticket.ImageUrl!), 
-            AudioUrl = _storageService.GenerateSignedUrl(ticket.AudioUrl!)
+            ticket.AiTranscription, // Single ticket view me text return hoga
+            ticket.AiSummary,
+            ticket.AiSentiment,
+            ticket.RagDraftReply,
+           // ticket.AiImageAnalysis,
+            ImageUrl = !string.IsNullOrEmpty(ticket.ImageUrl) ? _storageService.GenerateSignedUrl(ticket.ImageUrl) : null, 
+            AudioUrl = !string.IsNullOrEmpty(ticket.AudioUrl) ? _storageService.GenerateSignedUrl(ticket.AudioUrl) : null
         };
         return Ok(response);
     }
@@ -134,7 +140,8 @@ public class TicketsController : ControllerBase
             .Select(t => new {
              t.Id, t.Title, t.Description, t.AudioUrl, t.ImageUrl,
              t.Status, t.Category, CustomerName = t.Customer!.Name,
-             t.AiSummary, t.AiSentiment, t.CreatedAt 
+             t.AiSummary, t.AiSentiment, t.AiTranscription, // Dashboard list me add kiya
+             t.CreatedAt 
             })
             .ToListAsync();
 
@@ -142,7 +149,7 @@ public class TicketsController : ControllerBase
     }
 
     [HttpPut("{id}/status")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Agent")]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateTicketStatusDto request, [FromServices] IAuditService _auditService)
     {
         var ticket = await _context.Tickets.FindAsync(id);
@@ -161,7 +168,7 @@ public class TicketsController : ControllerBase
     }
     
     [HttpPost("{id}/notes")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Agent")]
     public async Task<IActionResult> AddNote(int id, [FromBody] AddNoteDto request)
     {
         var agentId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -225,7 +232,7 @@ public class TicketsController : ControllerBase
         }
     }
 
-// 🔥 THE SILVER BULLET: Direct AI Test Endpoint (CRASH-PROOF VERSION)
+//  THE SILVER BULLET: Direct AI Test Endpoint (CRASH-PROOF VERSION)
     [HttpGet("{id}/force-ai-test")]
     [Authorize] 
     public async Task<IActionResult> ForceAiTest(int id, [FromServices] IAIService _aiService, [FromServices] IStorageService _storageService)
@@ -261,11 +268,14 @@ public class TicketsController : ControllerBase
                     // Whisper AI ko bhejein
                     string transcript = await _aiService.TranscribeAudioAsync(audioStream, "audio.wav");
                     
+                    //  Yahan Audio text actual database field me assign ho raha hai
+                    ticket.AiTranscription = transcript; 
+
                     finalDescription = $"{finalDescription}\n\n[🎙️ Audio Transcript]: {transcript}";
                 }
                 catch (Exception audioEx)
                 {
-                    // 🛡️ SAFETY NET: Agar MinIO ya Whisper fail ho, toh app crash nahi hogi!
+                    // Agar MinIO ya Whisper fail ho, toh app crash nahi hogi!
                     finalDescription = $"{finalDescription}\n\n[⚠️ Audio Error]: {audioEx.Message}";
                 }
             }
@@ -283,11 +293,14 @@ public class TicketsController : ControllerBase
             ticket.Embedding = await _aiService.GenerateEmbeddingAsync(textToEmbed);
 
             ticket.Status = "In Progress";
+            
+            // Yahan final save ho raha hai!
             await _context.SaveChangesAsync(); 
 
             return Ok(new { 
                 message = "🔥 AI Enrichment Processed Successfully!", 
                 transcriptAdded = !string.IsNullOrEmpty(ticket.AudioUrl),
+                aiTranscription = ticket.AiTranscription, //  Response me confirm karne ke liye
                 updatedDescription = ticket.Description,
                 summary = ticket.AiSummary, 
                 sentiment = ticket.AiSentiment 
