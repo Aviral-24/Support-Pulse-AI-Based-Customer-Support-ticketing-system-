@@ -56,8 +56,8 @@ export default function AgentDashboard() {
     setIsGeneratingReply(true);
     const loadingToast = toast.loading("🧠 Searching past solutions & drafting reply...");
     try {
-      const response = await axios.post(`https://aviral-supportpulse.duckdns.org/api/v1/Tickets/${ticketId}/generate-reply`, {}, {
-     // const response = await axios.post(`http://34:93:237:221:5215/api/v1/Tickets/${ticketId}/generate-reply`, {}, {
+      const response = await axios.post(`https://aviral-supportpulse.duckdns.org/api/v1/Tickets/${ticketId}/draft-reply`, {}, {
+     // const response = await axios.post(`http://34:93:237:221:5215/api/v1/Tickets/${ticketId}/draft-reply`, {}, {
      //const response = await axios.post(`http://localhost:5215/api/v1/Tickets/${ticketId}/draft-reply`, {}, {
         headers: { 'Authorization': `Bearer ${user.token}` }
       });
