@@ -16,4 +16,10 @@ public class HealthController : ControllerBase
             timestamp = DateTime.UtcNow
         });
     }
+
+    [HttpGet("crash-test")]
+public IActionResult TriggerCrash()
+{
+    throw new Exception("Sentry Crash Test successful!");
+}
 }

@@ -37,7 +37,7 @@ public class EmailService : IEmailService
         }
         finally
         {
-            await smtp.DisconnectAsync(true);
+             await smtp.DisconnectAsync(true);
         }
     }
 }

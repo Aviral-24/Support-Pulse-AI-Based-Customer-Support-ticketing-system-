@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Sentry;
 
 namespace Backend.Middleware;
 
@@ -20,8 +21,10 @@ public class ExceptionMiddleware
         {
             await _next(context);
         }
-        catch (Exception ex)
+         catch (Exception ex)
         {
+              SentrySdk.CaptureException(ex);
+
             _logger.LogError(ex, ex.Message);
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
