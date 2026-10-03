@@ -115,6 +115,7 @@ services:
 
   db:
     image: pgvector/pgvector:pg16
+    restart: always
     env_file:
       - ./.env
     environment:
