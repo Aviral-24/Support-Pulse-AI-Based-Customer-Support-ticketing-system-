@@ -106,11 +106,12 @@ public class TicketProcessingWorker : BackgroundService
 
                 ticket.Description = finalDescription; 
 
-                //  TEXT ANALYTICS (Summary, Sentiment, Priority)
-                var aiResult = await _aiService.AnalyzeTicketAsync(ticket.Title ?? "", finalDescription);
-                ticket.AiSummary = aiResult.Summary;
-                ticket.AiSentiment = aiResult.Sentiment;
-                ticket.AiCategory = aiResult.Priority;
+               //  TEXT ANALYTICS (Category, Summary, Sentiment, Priority)
+              var aiResult = await _aiService.AnalyzeTicketAsync(ticket.Title ?? "", finalDescription);
+             ticket.AiCategory = aiResult.Category;  
+             ticket.AiSummary = aiResult.Summary;
+             ticket.AiSentiment = aiResult.Sentiment;
+             ticket.Priority = aiResult.Priority;    
 
                 //  VECTOR EMBEDDINGS
                 string textToEmbed = $"Title: {ticket.Title}. Details: {finalDescription}. Sentiment: {ticket.AiSentiment}";

@@ -19,7 +19,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<AuditLog> AuditLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
+    {  
+        // Yeh line race condition block karegi
+      modelBuilder.Entity<Ticket>().Property<uint>("xmin").IsRowVersion();
         base.OnModelCreating(modelBuilder);
         
         if (Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory")
