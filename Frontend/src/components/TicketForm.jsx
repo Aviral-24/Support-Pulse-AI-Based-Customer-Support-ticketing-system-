@@ -7,21 +7,12 @@ export default function TicketForm() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: 'Low', 
   });
   const [audioFile, setAudioFile] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const { user } = useAuth();
-
-  //  Dropdown ka color change karne wala function
-  const getCategoryColor = (cat) => {
-    if (cat === 'High') return 'bg-red-50 text-red-700 border-red-300';
-    if (cat === 'Medium') return 'bg-yellow-50 text-yellow-700 border-yellow-300';
-    if (cat === 'Low') return 'bg-green-50 text-green-700 border-green-300';
-    return 'bg-white text-gray-700 border-gray-300'; // Default
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,14 +21,14 @@ export default function TicketForm() {
     const data = new FormData();
     data.append('Title', formData.title);
     data.append('Description', formData.description);
-    data.append('Category', formData.category);
+    
     if (audioFile) data.append('AudioFile', audioFile);
     if (imageFile) data.append('ImageFile', imageFile);
 
     try {
-         const response = await axios.post('https://aviral-supportpulse.duckdns.org/api/v1/Tickets', data, {
-        // const response = await axios.post('http://34.93.237.221:5215/api/v1/Tickets', data, {
-        // const response = await axios.post('http://localhost:5215/api/v1/Tickets', data, {
+       const response = await axios.post('https://aviral-supportpulse.duckdns.org/api/v1/Tickets', data, {
+         // const response = await axios.post('http://34.93.237.221:5215/api/v1/Tickets', data, {
+        //  const response = await axios.post('http://localhost:5215/api/v1/Tickets', data, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${user.token}`
@@ -46,7 +37,7 @@ export default function TicketForm() {
       
       toast.success(`Ticket submitted successfully! ID: ${response.data.ticketId}`);
       
-      setFormData({ title: '', description: '', category: 'Low' });
+      setFormData({ title: '', description: '' });
       setAudioFile(null);
       setImageFile(null);
       e.target.reset(); 
@@ -87,20 +78,6 @@ export default function TicketForm() {
             placeholder="Please provide all the necessary details..."
             onChange={(e) => setFormData({...formData, description: e.target.value})}
           ></textarea>
-        </div>
-
-        {/*Category Dropdown with Colors and correct values */}
-        <div>
-          <label className="block font-medium text-gray-700 mb-1">Priority (Category)</label>
-          <select 
-            value={formData.category}
-            onChange={(e) => setFormData({...formData, category: e.target.value})}
-            className={`w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all font-semibold ${getCategoryColor(formData.category)}`}
-          >
-            <option value="Low" className="text-green-700 bg-white font-semibold">Low</option>
-            <option value="Medium" className="text-yellow-700 bg-white font-semibold">Medium</option>
-            <option value="High" className="text-red-700 bg-white font-semibold">High</option>
-          </select>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -40,7 +40,7 @@ export default function AgentDashboard() {
 
   const fetchTickets = async () => {
     try {
-      //const response = await axios.get('http://localhost:5215/api/v1/Tickets', {
+     // const response = await axios.get('http://localhost:5215/api/v1/Tickets', {
       // const response = await axios.get('http://34:93:237:221:5215/api/v1/Tickets', {
       const response = await axios.get('https://aviral-supportpulse.duckdns.org/api/v1/Tickets', {
         headers: { 'Authorization': `Bearer ${user.token}` },
@@ -109,7 +109,7 @@ export default function AgentDashboard() {
 
        const response = await axios.put(`https://aviral-supportpulse.duckdns.org/api/v1/Tickets/${id}/status`,
       // const response = await axios.put(`http://34:93:237:221:5215/api/v1/Tickets/${id}/status`,
-      // await axios.put(`http://localhost:5215/api/v1/Tickets/${id}/status`, 
+       //await axios.put(`http://localhost:5215/api/v1/Tickets/${id}/status`, 
         { status: newStatus },
         { headers: { 'Authorization': `Bearer ${user.token}` } }
       );
@@ -123,9 +123,9 @@ export default function AgentDashboard() {
   const addNote = async (id) => {
     if (!note.trim()) return toast.error("Note cannot be empty!");
     try { 
-          const response = await axios.post(`https://aviral-supportpulse.duckdns.org/api/v1/Tickets/${id}/notes`, 
+               await axios.post(`https://aviral-supportpulse.duckdns.org/api/v1/Tickets/${id}/notes`, 
              // await axios.post(`http://34:93:237:221:5215/api/v1/Tickets/${id}/notes`,    
-         // await axios.post(`http://localhost:5215/api/v1/Tickets/${id}/notes`, 
+             // await axios.post(`http://localhost:5215/api/v1/Tickets/${id}/notes`, 
         { note: note },
         { headers: { 'Authorization': `Bearer ${user.token}` } }
       );
@@ -141,9 +141,9 @@ export default function AgentDashboard() {
     const loadingToast = toast.loading("Generating PDF report...");
     try {
 
-       const response = await fetch(`https://aviral-supportpulse.duckdns.org/api/v1/Tickets/${ticketId}/pdf`, {
+         const response = await fetch(`https://aviral-supportpulse.duckdns.org/api/v1/Tickets/${ticketId}/pdf`, {
       // const response = await fetch(`http://34:93:237:221:5215/api/v1/Tickets/${ticketId}/pdf`, {
-      // const response = await fetch(`http://localhost:5215/api/v1/Tickets/${ticketId}/pdf`, {
+     //  const response = await fetch(`http://localhost:5215/api/v1/Tickets/${ticketId}/pdf`, {
             headers: { 'Authorization': `Bearer ${user.token}` }
         });
         if (!response.ok) throw new Error("PDF download failed");
@@ -190,261 +190,278 @@ export default function AgentDashboard() {
     return "bg-blue-50 text-blue-600 border-blue-200"; 
   };
 
-  return (
-    <div className="relative h-[calc(100vh-4rem)] overflow-hidden bg-slate-100">
-      <div className="relative z-10 h-full overflow-y-auto overflow-x-hidden p-6">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-6 text-gray-800">Agent Dashboard</h2>
-        
-        {/*AI Semantic Search Bar */}
-        <form onSubmit={handleSemanticSearch} className="mb-6">
-          <div className={`p-[2px] rounded-xl shadow-sm transition-all duration-300 ${isAiMode ? 'bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-500' : 'bg-gradient-to-r from-blue-400 to-indigo-400'}`}>
-            <div className="bg-white rounded-[10px] p-2 pl-4 flex items-center gap-3">
-              <Sparkles className={`w-6 h-6 ${isAiMode ? 'text-fuchsia-500' : 'text-indigo-400'}`} />
-              <input 
-                type="text" 
-                placeholder="Ask AI... (e.g. 'Find angry customers who had payment issues')" 
-                className="flex-1 outline-none text-gray-700 bg-transparent py-2 font-medium"
-                value={aiQuery}
-                onChange={(e) => setAiQuery(e.target.value)}
-              />
-              {isAiMode && (
-                <button type="button" onClick={clearAiSearch} className="p-2 text-gray-400 hover:text-red-500 transition-colors">
-                  <X className="w-5 h-5" />
-                </button>
-              )}
-              <button 
-                type="submit" 
-                disabled={isAiSearching}
-                className={`text-white px-6 py-2.5 rounded-lg font-bold transition-all shadow-md flex items-center gap-2 ${isAiMode ? 'bg-purple-600 hover:bg-purple-700' : 'bg-indigo-600 hover:bg-indigo-700'}`}
-              >
-                {isAiSearching ? '🧠 Thinking...' : 'Semantic Search'}
-              </button>
-            </div>
-          </div>
-        </form>
 
-        {/* Normal Filters (Hide in AI Mode) */}
-        {!isAiMode && (
-          <div className="flex gap-4 mb-6">
-            <div className="relative w-1/3">
-              <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-              <input 
-                type="text" 
-                placeholder="Standard Search..." 
-                className="border border-gray-300 pl-10 p-2.5 rounded-lg w-full shadow-sm outline-none focus:ring-2 focus:ring-blue-500"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-            <select 
-              className="border border-gray-300 p-2.5 rounded-lg shadow-sm outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="">All Statuses</option>
-              <option value="Open">Open</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Resolved">Resolved</option>
-            </select>
-          </div>
-        )}
+return (
+    <div className="relative h-[calc(100vh-4rem)] overflow-hidden bg-slate-100">
+      <div className="relative z-10 h-full overflow-y-auto overflow-x-hidden p-6">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold mb-6 text-gray-800">Agent Dashboard</h2>
+        
+        {/*AI Semantic Search Bar */}
+        <form onSubmit={handleSemanticSearch} className="mb-6">
+          <div className={`p-[2px] rounded-xl shadow-sm transition-all duration-300 ${isAiMode ? 'bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-500' : 'bg-gradient-to-r from-blue-400 to-indigo-400'}`}>
+            <div className="bg-white rounded-[10px] p-2 pl-4 flex items-center gap-3">
+              <Sparkles className={`w-6 h-6 ${isAiMode ? 'text-fuchsia-500' : 'text-indigo-400'}`} />
+              <input 
+                type="text" 
+                placeholder="Ask AI... (e.g. 'Find angry customers who had payment issues')" 
+                className="flex-1 outline-none text-gray-700 bg-transparent py-2 font-medium"
+                value={aiQuery}
+                onChange={(e) => setAiQuery(e.target.value)}
+              />
+              {isAiMode && (
+                <button type="button" onClick={clearAiSearch} className="p-2 text-gray-400 hover:text-red-500 transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              )}
+              <button 
+                type="submit" 
+                disabled={isAiSearching}
+                className={`text-white px-6 py-2.5 rounded-lg font-bold transition-all shadow-md flex items-center gap-2 ${isAiMode ? 'bg-purple-600 hover:bg-purple-700' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+              >
+                {isAiSearching ? '🧠 Thinking...' : 'Semantic Search'}
+              </button>
+            </div>
+          </div>
+        </form>
 
-        {/* AI Results Indicator */}
-        {isAiMode && (
-          <div className="mb-4 text-purple-800 bg-purple-100 px-4 py-2 rounded-lg font-medium border border-purple-200 inline-block">
-            Showing top semantic matches from Vector Database based on AI Embeddings.
-          </div>
-        )}
+        {/* Normal Filters (Hide in AI Mode) */}
+        {!isAiMode && (
+          <div className="flex gap-4 mb-6">
+            <div className="relative w-1/3">
+              <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+              <input 
+                type="text" 
+                placeholder="Standard Search..." 
+                className="border border-gray-300 pl-10 p-2.5 rounded-lg w-full shadow-sm outline-none focus:ring-2 focus:ring-blue-500"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <select 
+              className="border border-gray-300 p-2.5 rounded-lg shadow-sm outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="">All Statuses</option>
+              <option value="Open">Open</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Resolved">Resolved</option>
+            </select>
+          </div>
+        )}
 
-        {/* Ticket Table */}
-        <div className="overflow-x-auto shadow-md rounded-xl border border-gray-100">
-          <table className="min-w-full bg-white">
-            <thead className={`${isAiMode ? 'bg-purple-900' : 'bg-gray-800'} text-white transition-colors`}>
-              <tr>
-                <th className="py-3 px-4 text-left">ID</th>
-                <th className="py-3 px-4 text-left">Title & Summary</th>
-                {isAiMode && <th className="py-3 px-4 text-left">AI Match Score</th>}
-                <th className="py-3 px-4 text-left">Status</th>
-                <th className="py-3 px-4 text-center">AI Sentiment</th>
-                <th className="py-3 px-4 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tickets.map(t => (
-                // 🔥 NEW: Highlight Row if Malicious
-                <tr key={t.id} className={`border-b transition-colors ${t.aiSentiment?.toLowerCase().includes('malicious') ? 'bg-red-50 border-red-200 hover:bg-red-100' : 'hover:bg-gray-50'}`}>
-                  <td className="py-3 px-4 font-semibold text-gray-600">#{t.id}</td>
-                  
-                  <td className="py-3 px-4">
-                    <p className="font-bold text-gray-800 mb-1">{t.title}</p>
-                    {isAiMode && (
-                      <p className="text-sm text-gray-500 line-clamp-2 italic">"{t.aiSummary || 'No summary generated yet'}"</p>
-                    )}
-                  </td>
+        {/* AI Results Indicator */}
+        {isAiMode && (
+          <div className="mb-4 text-purple-800 bg-purple-100 px-4 py-2 rounded-lg font-medium border border-purple-200 inline-block">
+            Showing top semantic matches from Vector Database based on AI Embeddings.
+          </div>
+        )}
 
-                  {isAiMode && (
-                    <td className="py-3 px-4">
-                      <span className="bg-fuchsia-100 text-fuchsia-700 px-3 py-1 rounded-full font-bold text-sm border border-fuchsia-200">
-                        {getMatchPercentage(t.distance)}% Match
-                      </span>
-                    </td>
-                  )}
+        {/* Ticket Table */}
+        <div className="overflow-x-auto shadow-md rounded-xl border border-gray-100">
+          <table className="min-w-full bg-white">
+            <thead className={`${isAiMode ? 'bg-purple-900' : 'bg-gray-800'} text-white transition-colors`}>
+              <tr>
+                <th className="py-3 px-4 text-left">ID</th>
+                <th className="py-3 px-4 text-left">Title & Summary</th>
+                {isAiMode && <th className="py-3 px-4 text-left">AI Match Score</th>}
+                <th className="py-3 px-4 text-left">Status</th>
+                <th className="py-3 px-4 text-left">Category</th>
+                <th className="py-3 px-4 text-center">AI Sentiment</th>
+                <th className="py-3 px-4 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tickets.map(t => (
+                <tr key={t.id} className={`border-b transition-colors ${t.aiSentiment?.toLowerCase().includes('malicious') ? 'bg-red-50 border-red-200 hover:bg-red-100' : 'hover:bg-gray-50'}`}>
+                  <td className="py-3 px-4 font-semibold text-gray-600">#{t.id}</td>
+                  
+                  <td className="py-3 px-4">
+                    <p className="font-bold text-gray-800 mb-1">{t.title}</p>
+                    {isAiMode && (
+                      <p className="text-sm text-gray-500 line-clamp-2 italic">"{t.aiSummary || 'No summary generated yet'}"</p>
+                    )}
+                  </td>
 
-                  <td className="py-3 px-4">
-                    <select 
-                      className="border border-gray-300 p-1.5 rounded-lg font-medium text-sm text-gray-700 bg-white shadow-sm outline-none focus:ring-2 focus:ring-blue-500" 
-                      value={t.status}
-                      onChange={(e) => updateStatus(t.id, e.target.value)}
-                    >
-                      <option value="Open">Open</option>
-                      <option value="In Progress">In Progress</option>
-                      <option value="Resolved">Resolved</option>
-                    </select>
-                  </td>
-                  
-                  <td className="py-3 px-4 text-center">
-                    <div className="flex justify-center items-center">
-                      <span 
-                        className={`inline-block max-w-[180px] text-wrap text-xs px-3 py-1.5 rounded-lg border font-semibold leading-tight shadow-sm ${getSentimentBadgeStyle(t.aiSentiment)}`}
-                      >
-                        {t.aiSentiment || 'Analyzing...'}
-                      </span>
-                    </div>
-                  </td>
+                  {isAiMode && (
+                    <td className="py-3 px-4">
+                      <span className="bg-fuchsia-100 text-fuchsia-700 px-3 py-1 rounded-full font-bold text-sm border border-fuchsia-200">
+                        {getMatchPercentage(t.distance)}% Match
+                      </span>
+                    </td>
+                  )}
 
-                  <td className="py-3 px-4 text-center">
-                    <button 
-                      onClick={() => setSelectedTicket(t)}
-                      className="bg-blue-600 text-white px-3.5 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm"
-                    >
-                      View Details
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {tickets.length === 0 && (
-                <tr><td colSpan={isAiMode ? "6" : "5"} className="text-center py-8 text-gray-500 italic">No tickets found.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                  <td className="py-3 px-4">
+                    <select 
+                      className="border border-gray-300 p-1.5 rounded-lg font-medium text-sm text-gray-700 bg-white shadow-sm outline-none focus:ring-2 focus:ring-blue-500" 
+                      value={t.status}
+                      onChange={(e) => updateStatus(t.id, e.target.value)}
+                    >
+                      <option value="Open">Open</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Resolved">Resolved</option>
+                    </select>
+                  </td>
 
-        {/* Pagination Controls */}
-        {!isAiMode && (
-          <div className="flex gap-4 mt-6 justify-end items-center">
-            <button 
-              disabled={page === 1} 
-              onClick={() => setPage(page - 1)}
-              className="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg disabled:opacity-50 hover:bg-gray-300 transition-colors"
-            >
-              Previous
-            </button>
-            <span className="font-semibold text-gray-700">Page {page}</span>
-            <button 
-              onClick={() => setPage(page + 1)}
-              className="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors"
-            >
-              Next
-            </button>
-          </div>
-        )}
+                  {/* Category Column Data */}
+                  <td className="py-3 px-4">
+                    <span className="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-md text-xs font-bold border border-gray-200 whitespace-nowrap">
+                      {t.aiCategory || t.category || 'Uncategorized'}
+                    </span>
+                  </td>
+                  
+                  <td className="py-3 px-4 text-center">
+                    <div className="flex justify-center items-center">
+                      <span 
+                        className={`inline-block max-w-[180px] text-wrap text-xs px-3 py-1.5 rounded-lg border font-semibold leading-tight shadow-sm ${getSentimentBadgeStyle(t.aiSentiment)}`}
+                      >
+                        {t.aiSentiment || 'Analyzing...'}
+                      </span>
+                    </div>
+                  </td>
 
-        {/* Ticket Details Modal */}
-        {selectedTicket && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl p-6 max-w-2xl w-full shadow-2xl relative overflow-y-auto max-h-[90vh]">
-              <button 
-                onClick={() => setSelectedTicket(null)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 font-bold text-xl bg-gray-100 hover:bg-gray-200 w-8 h-8 rounded-full flex items-center justify-center transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-              
-              <h3 className="text-2xl font-bold mb-2 text-gray-800">Ticket #{selectedTicket.id}: {selectedTicket.title}</h3>
-              <p className="text-gray-600 mb-4 bg-gray-50 p-4 rounded-xl border border-gray-100 text-sm">{selectedTicket.description || 'View PDF for full description.'}</p>
-              
-             {/* AI Insights Card */}
-             <div className="bg-purple-50 border border-purple-200 p-4 rounded-xl mb-4 shadow-sm">
-                <h4 className="font-bold text-purple-900 mb-1 flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4" /> AI Insights
-                </h4>
-                {/* 🔥 NEW: Highlight Summary Text if it contains SECURITY ALERT */}
-                <p className="text-sm text-gray-700 mb-1.5">
-                  <span className="font-semibold">Summary:</span> 
-                  <span className={(selectedTicket.aiSummary || selectedTicket.AiSummary)?.includes("SECURITY ALERT") ? " text-red-600 font-bold ml-1" : " ml-1"}>
-                    {selectedTicket.aiSummary || selectedTicket.AiSummary || 'Analyzing summary...'}
-                  </span>
-                </p>
-                <p className="text-sm flex items-center">
-                  <span className="font-semibold">Sentiment:</span> 
-                  <span className={`ml-2 px-2.5 py-0.5 rounded-full text-xs font-bold border ${getSentimentBadgeStyle(selectedTicket.aiSentiment || selectedTicket.AiSentiment)}`}>
-                    {selectedTicket.aiSentiment || selectedTicket.AiSentiment || 'Neutral'}
-                  </span>
-                </p>
-              </div>
+                  <td className="py-3 px-4 text-center">
+                    <button 
+                      onClick={() => setSelectedTicket(t)}
+                      className="bg-blue-600 text-white px-3.5 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm"
+                    >
+                      View Details
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {tickets.length === 0 && (
+                <tr><td colSpan={isAiMode ? "7" : "6"} className="text-center py-8 text-gray-500 italic">No tickets found.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-              {/* PDF Download Button */}
-              <button 
-                onClick={() => handleDownloadPdf(selectedTicket.id)}
-                className="mb-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
-              >
-                📄 Download Detailed PDF Report
-              </button>
+        {/* Pagination Controls */}
+        {!isAiMode && (
+          <div className="flex gap-4 mt-6 justify-end items-center">
+            <button 
+              disabled={page === 1} 
+              onClick={() => setPage(page - 1)}
+              className="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg disabled:opacity-50 hover:bg-gray-300 transition-colors"
+            >
+              Previous
+            </button>
+            <span className="font-semibold text-gray-700">Page {page}</span>
+            <button 
+              onClick={() => setPage(page + 1)}
+              className="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors"
+            >
+              Next
+            </button>
+          </div>
+        )}
 
-            {/* RAG Auto-Reply Section */}
-              <div className="mt-6 border-t border-gray-100 pt-5 mb-4">
-                <div className="flex justify-between items-center mb-3">
-                  <h4 className="font-bold text-indigo-900 flex items-center gap-2 text-sm">
-                    <Sparkles className="w-4 h-4 text-indigo-600" /> RAG Auto-Reply (Draft)
-                  </h4>
-                  <button 
-                    onClick={() => generateAiReply(selectedTicket.id)}
-                    disabled={isGeneratingReply}
-                    className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold px-4 py-2 rounded-lg text-xs transition-colors shadow-sm disabled:opacity-50"
-                  >
-                    {isGeneratingReply ? 'Generating...' : '✨ Generate AI Reply'}
-                  </button>
-                </div>
-                
-                {draftReply && (
-                  <div className="bg-indigo-50 border border-indigo-200 p-4 rounded-xl relative shadow-inner">
-                    <p className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
-                      {draftReply}
-                    </p>
-                    <button 
-                      onClick={() => { navigator.clipboard.writeText(draftReply); toast.success("Draft copied to clipboard!"); }}
-                      className="absolute top-2 right-2 bg-white border border-gray-300 text-gray-600 hover:text-indigo-600 p-1.5 rounded-md text-xs shadow-sm transition-colors"
-                      title="Copy to clipboard"
-                    >
-                      📋 Copy
-                    </button>
-                  </div>
-                )}
-              </div>
-              
-              {/* Add Internal Note */}
-              <div className="mt-6 border-t border-gray-100 pt-4">
-                <h4 className="font-bold text-gray-800 mb-2 text-sm">Add Internal Note (Agent Only):</h4>
-                <textarea 
-                  className="w-full border border-gray-300 p-3 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-500 text-sm" 
-                  rows="3" 
-                  placeholder="Type your secret internal note here..."
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                ></textarea>
-                <button 
-                  onClick={() => addNote(selectedTicket.id)}
-                  className="bg-emerald-600 text-white font-semibold px-4 py-2.5 rounded-xl hover:bg-emerald-700 transition-colors w-full shadow-sm"
-                >
-                  Save Internal Note
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-    </div>
-  );
+        {/* Ticket Details Modal */}
+        {selectedTicket && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl p-6 max-w-2xl w-full shadow-2xl relative overflow-y-auto max-h-[90vh]">
+              <button 
+                onClick={() => setSelectedTicket(null)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 font-bold text-xl bg-gray-100 hover:bg-gray-200 w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              
+              <h3 className="text-2xl font-bold mb-2 text-gray-800">Ticket #{selectedTicket.id}: {selectedTicket.title}</h3>
+              <p className="text-gray-600 mb-4 bg-gray-50 p-4 rounded-xl border border-gray-100 text-sm">{selectedTicket.description || 'View PDF for full description.'}</p>
+              
+             {/* AI Insights Card */}
+             <div className="bg-purple-50 border border-purple-200 p-4 rounded-xl mb-4 shadow-sm">
+                <h4 className="font-bold text-purple-900 mb-1 flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4" /> AI Insights
+                </h4>
+
+                {/* Category inside modal */}
+                <p className="text-sm text-gray-700 mb-1.5">
+                  <span className="font-semibold">Category:</span> 
+                  <span className="ml-1 text-indigo-700 font-bold">
+                    {selectedTicket.aiCategory || selectedTicket.category || selectedTicket.AiCategory || 'Uncategorized'}
+                  </span>
+                </p>
+
+                {/* 🔥 NEW: Highlight Summary Text if it contains SECURITY ALERT */}
+                <p className="text-sm text-gray-700 mb-1.5">
+                  <span className="font-semibold">Summary:</span> 
+                  <span className={(selectedTicket.aiSummary || selectedTicket.AiSummary)?.includes("SECURITY ALERT") ? " text-red-600 font-bold ml-1" : " ml-1"}>
+                    {selectedTicket.aiSummary || selectedTicket.AiSummary || 'Analyzing summary...'}
+                  </span>
+                </p>
+                <p className="text-sm flex items-center">
+                  <span className="font-semibold">Sentiment:</span> 
+                  <span className={`ml-2 px-2.5 py-0.5 rounded-full text-xs font-bold border ${getSentimentBadgeStyle(selectedTicket.aiSentiment || selectedTicket.AiSentiment)}`}>
+                    {selectedTicket.aiSentiment || selectedTicket.AiSentiment || 'Neutral'}
+                  </span>
+                </p>
+              </div>
+
+              {/* PDF Download Button */}
+              <button 
+                onClick={() => handleDownloadPdf(selectedTicket.id)}
+                className="mb-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
+              >
+                📄 Download Detailed PDF Report
+              </button>
+
+            {/* RAG Auto-Reply Section */}
+              <div className="mt-6 border-t border-gray-100 pt-5 mb-4">
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="font-bold text-indigo-900 flex items-center gap-2 text-sm">
+                    <Sparkles className="w-4 h-4 text-indigo-600" /> RAG Auto-Reply (Draft)
+                  </h4>
+                  <button 
+                    onClick={() => generateAiReply(selectedTicket.id)}
+                    disabled={isGeneratingReply}
+                    className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold px-4 py-2 rounded-lg text-xs transition-colors shadow-sm disabled:opacity-50"
+                  >
+                    {isGeneratingReply ? 'Generating...' : '✨ Generate AI Reply'}
+                  </button>
+                </div>
+                
+                {draftReply && (
+                  <div className="bg-indigo-50 border border-indigo-200 p-4 rounded-xl relative shadow-inner">
+                    <p className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
+                      {draftReply}
+                    </p>
+                    <button 
+                      onClick={() => { navigator.clipboard.writeText(draftReply); toast.success("Draft copied to clipboard!"); }}
+                      className="absolute top-2 right-2 bg-white border border-gray-300 text-gray-600 hover:text-indigo-600 p-1.5 rounded-md text-xs shadow-sm transition-colors"
+                      title="Copy to clipboard"
+                    >
+                      📋 Copy
+                    </button>
+                  </div>
+                )}
+              </div>
+              
+              {/* Add Internal Note */}
+              <div className="mt-6 border-t border-gray-100 pt-4">
+                <h4 className="font-bold text-gray-800 mb-2 text-sm">Add Internal Note (Agent Only):</h4>
+                <textarea 
+                  className="w-full border border-gray-300 p-3 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-500 text-sm" 
+                  rows="3" 
+                  placeholder="Type your secret internal note here..."
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                ></textarea>
+                <button 
+                  onClick={() => addNote(selectedTicket.id)}
+                  className="bg-emerald-600 text-white font-semibold px-4 py-2.5 rounded-xl hover:bg-emerald-700 transition-colors w-full shadow-sm"
+                >
+                  Save Internal Note
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+    </div>
+  );
 }
