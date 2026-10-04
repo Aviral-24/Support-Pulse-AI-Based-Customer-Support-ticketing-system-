@@ -40,9 +40,9 @@ export default function AgentDashboard() {
 
   const fetchTickets = async () => {
     try {
-     // const response = await axios.get('http://localhost:5215/api/v1/Tickets', {
+      const response = await axios.get('http://localhost:5215/api/v1/Tickets', {
       // const response = await axios.get('http://34:93:237:221:5215/api/v1/Tickets', {
-      const response = await axios.get('https://aviral-supportpulse.duckdns.org/api/v1/Tickets', {
+     // const response = await axios.get('https://aviral-supportpulse.duckdns.org/api/v1/Tickets', {
         headers: { 'Authorization': `Bearer ${user.token}` },
         params: { search, status: statusFilter, page, pageSize: 10 }
       });
@@ -56,9 +56,9 @@ export default function AgentDashboard() {
     setIsGeneratingReply(true);
     const loadingToast = toast.loading("🧠 Searching past solutions & drafting reply...");
     try {
-      const response = await axios.post(`https://aviral-supportpulse.duckdns.org/api/v1/Tickets/${ticketId}/draft-reply`, {}, {
+     // const response = await axios.post(`https://aviral-supportpulse.duckdns.org/api/v1/Tickets/${ticketId}/draft-reply`, {}, {
      // const response = await axios.post(`http://34:93:237:221:5215/api/v1/Tickets/${ticketId}/draft-reply`, {}, {
-     //const response = await axios.post(`http://localhost:5215/api/v1/Tickets/${ticketId}/draft-reply`, {}, {
+     const response = await axios.post(`http://localhost:5215/api/v1/Tickets/${ticketId}/draft-reply`, {}, {
         headers: { 'Authorization': `Bearer ${user.token}` }
       });
       setDraftReply(response.data.draftReply);
@@ -81,9 +81,9 @@ export default function AgentDashboard() {
     setIsAiSearching(true);
     try {
 
-       const response = await axios.get('https://aviral-supportpulse.duckdns.org/api/v1/Tickets/semantic-search', {
+      // const response = await axios.get('https://aviral-supportpulse.duckdns.org/api/v1/Tickets/semantic-search', {
      // const response = await axios.get('http://34:93:237:221:5215/api/v1/Tickets/semantic-search', {   
-     //const response = await axios.get('http://localhost:5215/api/v1/Tickets/semantic-search', {
+     const response = await axios.get('http://localhost:5215/api/v1/Tickets/semantic-search', {
         headers: { 'Authorization': `Bearer ${user.token}` },
         params: { query: aiQuery }
       });
@@ -107,9 +107,9 @@ export default function AgentDashboard() {
   const updateStatus = async (id, newStatus) => {
     try {
 
-       const response = await axios.put(`https://aviral-supportpulse.duckdns.org/api/v1/Tickets/${id}/status`,
+      // const response = await axios.put(`https://aviral-supportpulse.duckdns.org/api/v1/Tickets/${id}/status`,
       // const response = await axios.put(`http://34:93:237:221:5215/api/v1/Tickets/${id}/status`,
-       //await axios.put(`http://localhost:5215/api/v1/Tickets/${id}/status`, 
+       await axios.put(`http://localhost:5215/api/v1/Tickets/${id}/status`, 
         { status: newStatus },
         { headers: { 'Authorization': `Bearer ${user.token}` } }
       );
@@ -123,9 +123,9 @@ export default function AgentDashboard() {
   const addNote = async (id) => {
     if (!note.trim()) return toast.error("Note cannot be empty!");
     try { 
-               await axios.post(`https://aviral-supportpulse.duckdns.org/api/v1/Tickets/${id}/notes`, 
+             //  await axios.post(`https://aviral-supportpulse.duckdns.org/api/v1/Tickets/${id}/notes`, 
              // await axios.post(`http://34:93:237:221:5215/api/v1/Tickets/${id}/notes`,    
-             // await axios.post(`http://localhost:5215/api/v1/Tickets/${id}/notes`, 
+              await axios.post(`http://localhost:5215/api/v1/Tickets/${id}/notes`, 
         { note: note },
         { headers: { 'Authorization': `Bearer ${user.token}` } }
       );
@@ -142,7 +142,7 @@ export default function AgentDashboard() {
     try {
 
          const response = await fetch(`https://aviral-supportpulse.duckdns.org/api/v1/Tickets/${ticketId}/pdf`, {
-      // const response = await fetch(`http://34:93:237:221:5215/api/v1/Tickets/${ticketId}/pdf`, {
+       //const response = await fetch(`http://34:93:237:221:5215/api/v1/Tickets/${ticketId}/pdf`, {
      //  const response = await fetch(`http://localhost:5215/api/v1/Tickets/${ticketId}/pdf`, {
             headers: { 'Authorization': `Bearer ${user.token}` }
         });
@@ -189,7 +189,6 @@ export default function AgentDashboard() {
     }
     return "bg-blue-50 text-blue-600 border-blue-200"; 
   };
-
 
 return (
     <div className="relative h-[calc(100vh-4rem)] overflow-hidden bg-slate-100">
@@ -280,7 +279,7 @@ return (
                   <td className="py-3 px-4">
                     <p className="font-bold text-gray-800 mb-1">{t.title}</p>
                     {isAiMode && (
-                      <p className="text-sm text-gray-500 line-clamp-2 italic">"{t.aiSummary || 'No summary generated yet'}"</p>
+                      <p className="text-sm text-gray-500 line-clamp-2 italic">"{t.aiSummary || t.AiSummary || 'No summary generated yet'}"</p>
                     )}
                   </td>
 
@@ -304,19 +303,19 @@ return (
                     </select>
                   </td>
 
-                  {/* Category Column Data */}
+                  {/* Safely Handling AiCategory from JSON Response */}
                   <td className="py-3 px-4">
                     <span className="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-md text-xs font-bold border border-gray-200 whitespace-nowrap">
-                      {t.aiCategory || t.category || 'Uncategorized'}
+                      {t.aiCategory || t.AiCategory || t.category || 'General'}
                     </span>
                   </td>
                   
                   <td className="py-3 px-4 text-center">
                     <div className="flex justify-center items-center">
                       <span 
-                        className={`inline-block max-w-[180px] text-wrap text-xs px-3 py-1.5 rounded-lg border font-semibold leading-tight shadow-sm ${getSentimentBadgeStyle(t.aiSentiment)}`}
+                        className={`inline-block max-w-[180px] text-wrap text-xs px-3 py-1.5 rounded-lg border font-semibold leading-tight shadow-sm ${getSentimentBadgeStyle(t.aiSentiment || t.AiSentiment)}`}
                       >
-                        {t.aiSentiment || 'Analyzing...'}
+                        {t.aiSentiment || t.AiSentiment || 'Analyzing...'}
                       </span>
                     </div>
                   </td>
@@ -378,15 +377,13 @@ return (
                   <Sparkles className="w-4 h-4" /> AI Insights
                 </h4>
 
-                {/* Category inside modal */}
                 <p className="text-sm text-gray-700 mb-1.5">
                   <span className="font-semibold">Category:</span> 
                   <span className="ml-1 text-indigo-700 font-bold">
-                    {selectedTicket.aiCategory || selectedTicket.category || selectedTicket.AiCategory || 'Uncategorized'}
+                    {selectedTicket.aiCategory || selectedTicket.AiCategory || selectedTicket.category || 'General'}
                   </span>
                 </p>
 
-                {/* 🔥 NEW: Highlight Summary Text if it contains SECURITY ALERT */}
                 <p className="text-sm text-gray-700 mb-1.5">
                   <span className="font-semibold">Summary:</span> 
                   <span className={(selectedTicket.aiSummary || selectedTicket.AiSummary)?.includes("SECURITY ALERT") ? " text-red-600 font-bold ml-1" : " ml-1"}>
