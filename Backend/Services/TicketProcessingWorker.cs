@@ -9,6 +9,8 @@ using Backend.Data;
 using Backend.Services;
 using Backend.Services.Async; 
 using Backend.Models;
+using Backend.Services.Email;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Workers;
 
@@ -37,15 +39,20 @@ public class TicketProcessingWorker : BackgroundService
                 var _context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>(); 
                 var _aiService = scope.ServiceProvider.GetRequiredService<IAIService>();
                 var _storageService = scope.ServiceProvider.GetRequiredService<IStorageService>();
+                var _emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
 
-                var ticket = await _context.Tickets.FindAsync(new object[] { ticketId }, stoppingToken);
+                //  Customer details DB se fetch karne ke liye .Include() lagaya gaya
+                var ticket = await _context.Tickets
+                    .Include(t => t.Customer)
+                    .FirstOrDefaultAsync(t => t.Id == ticketId, stoppingToken);
+
                 if (ticket == null) continue;
 
                 Console.WriteLine($"[PROCESSING] AI is analyzing Ticket #{ticketId} in background...");
                 
                 string finalDescription = ticket.Description ?? "";
 
-                //AUDIO TRANSCRIPTION (CRASH-PROOF)
+                // AUDIO TRANSCRIPTION (CRASH-PROOF)
                 if (!string.IsNullOrEmpty(ticket.AudioUrl))
                 {
                     try 
@@ -120,6 +127,48 @@ public class TicketProcessingWorker : BackgroundService
                 await _context.SaveChangesAsync(stoppingToken);
                 
                 Console.WriteLine($"[SUCCESS] Ticket #{ticketId} AI Enrichment Completed!");
+
+                // Safely check for Malicious activity
+                bool isMalicious = (!string.IsNullOrEmpty(ticket.AiCategory) && ticket.AiCategory.Contains("Security", StringComparison.OrdinalIgnoreCase)) || 
+                                   (!string.IsNullOrEmpty(ticket.AiSentiment) && ticket.AiSentiment.Contains("Malicious", StringComparison.OrdinalIgnoreCase));
+
+                // Safely check for Negative sentiment
+                bool isNegative = (!string.IsNullOrEmpty(ticket.AiSentiment) && ticket.AiSentiment.Contains("Frustrated", StringComparison.OrdinalIgnoreCase)) || 
+                                  (!string.IsNullOrEmpty(ticket.AiSentiment) && ticket.AiSentiment.Contains("Angry", StringComparison.OrdinalIgnoreCase));
+
+                // Sirf Malicious ya Negative hone par hi alert bheja jayega
+                if (isMalicious || isNegative)
+                {
+                    try
+                    {
+                        string subject = isMalicious ? $"🚨 CRITICAL SECURITY ALERT: Malicious Ticket #{ticket.Id}" 
+                                                     : $"⚠️ URGENT: Negative Customer Sentiment on Ticket #{ticket.Id}";
+                                                     
+                        // 👇 UPDATE 2: Email Body me Customer Name aur Email add kiya gaya
+                        string body = $@"
+                            <h2>Alert for Support Ticket #{ticket.Id}</h2>
+                            <div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin-bottom: 15px;'>
+                                <p style='margin: 0; font-size: 16px;'><strong>Customer Name:</strong> {ticket.Customer?.Name ?? "Unknown User"}</p>
+                                <p style='margin: 0; font-size: 16px;'><strong>Customer Email:</strong> {ticket.Customer?.Email ?? "No Email Provided"}</p>
+                            </div>
+                            <p><strong>Title:</strong> {ticket.Title}</p>
+                            <p><strong>Category:</strong> {ticket.AiCategory}</p>
+                            <p><strong>Sentiment:</strong> <span style='color:red; font-weight:bold;'>{ticket.AiSentiment}</span></p>
+                            <p><strong>AI Summary:</strong> {ticket.AiSummary}</p>
+                            <br/>
+                            <p>Please check the Agent Dashboard immediately to handle this issue.</p>";
+
+                        // Admin email set karein
+                        await _emailService.SendEmailAsync("aviral210462@acropolis.in", subject, body);
+                        
+                        Console.WriteLine($"[ALERT] Alert Email sent successfully for Ticket #{ticket.Id} (Reason: {(isMalicious ? "Malicious" : "Negative Sentiment")})");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[ERROR] Failed to send alert email in worker: {ex.Message}");
+                    }
+                }
+
             }
             catch (Exception ex)
             {

@@ -136,8 +136,8 @@ public class TicketsController : ControllerBase
             .Take(pageSize)
             .Select(t => new {
              t.Id, t.Title, t.Description, t.AudioUrl, t.ImageUrl,
-             t.Status, t.Category, CustomerName = t.Customer!.Name,
-             t.AiSummary, t.AiSentiment, t.AiTranscription, 
+             t.Status, t.Category,t.AiCategory, CustomerName = t.Customer!.Name,
+             t.AiSummary, t.AiSentiment, t.AiTranscription,t.Priority,
              t.CreatedAt 
             })
             .ToListAsync();
