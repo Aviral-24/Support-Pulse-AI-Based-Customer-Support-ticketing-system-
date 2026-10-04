@@ -2,7 +2,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
-namespace Backend.Services;
+namespace Backend.Interfaces;
 
 public interface IStorageService
 {

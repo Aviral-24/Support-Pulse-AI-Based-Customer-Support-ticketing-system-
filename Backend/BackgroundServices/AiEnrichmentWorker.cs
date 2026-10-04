@@ -5,9 +5,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Backend.Data;
-using Backend.Services;
+using Backend.Interfaces;
+using Backend.Services.Async;
 
-namespace Backend.Services.Async;
+namespace Backend.BackgroundServices;
 
 public class AiEnrichmentWorker : BackgroundService
 {

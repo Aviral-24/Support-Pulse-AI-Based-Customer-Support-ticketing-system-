@@ -8,6 +8,7 @@ using Amazon.S3.Model;
 using Amazon.S3.Util;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Backend.Interfaces;
 
 namespace Backend.Services;
 

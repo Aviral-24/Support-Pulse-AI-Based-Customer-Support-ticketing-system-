@@ -8,11 +8,12 @@ using Microsoft.Extensions.Hosting;
 using Backend.Data; 
 using Backend.Services;
 using Backend.Services.Async; 
+using Backend.Interfaces;
 using Backend.Models;
 using Backend.Services.Email;
 using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Workers;
+namespace Backend.BackgroundServices;
 
 public class TicketProcessingWorker : BackgroundService
 {
@@ -144,7 +145,7 @@ public class TicketProcessingWorker : BackgroundService
                         string subject = isMalicious ? $"🚨 CRITICAL SECURITY ALERT: Malicious Ticket #{ticket.Id}" 
                                                      : $"⚠️ URGENT: Negative Customer Sentiment on Ticket #{ticket.Id}";
                                                      
-                        // 👇 UPDATE 2: Email Body me Customer Name aur Email add kiya gaya
+                        // Email Body me Customer Name aur Email add kiya gaya
                         string body = $@"
                             <h2>Alert for Support Ticket #{ticket.Id}</h2>
                             <div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin-bottom: 15px;'>

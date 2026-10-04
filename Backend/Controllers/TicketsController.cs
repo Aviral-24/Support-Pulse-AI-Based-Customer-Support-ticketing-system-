@@ -7,9 +7,11 @@ using Backend.DTOs;
 using Backend.Services.Async; 
 using Backend.Services;
 using Backend.Services.Email; 
+using Backend.Interfaces;
 using System.Security.Claims;
 using Backend.Services.Pdf;
 using Pgvector.EntityFrameworkCore;
+using Backend.BackgroundServices;
 
 namespace Backend.Controllers;
 

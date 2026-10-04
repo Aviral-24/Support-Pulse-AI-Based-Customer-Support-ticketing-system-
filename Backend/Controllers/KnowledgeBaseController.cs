@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Backend.Data;
 using Backend.Models;
 using Backend.DTOs;
-using Backend.Services; // IAIService ke liye ye namespace add kiya gaya hai
+using Backend.Interfaces;
 
 namespace Backend.Controllers
 {

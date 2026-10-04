@@ -11,6 +11,7 @@ using OpenAI;
 using OpenAI.Chat;
 using Pgvector;
 using System.ClientModel;
+using Backend.Interfaces;
 
 namespace Backend.Services;
 

@@ -10,8 +10,10 @@ using Microsoft.OpenApi.Models;
 using System.Threading.RateLimiting;
 using Backend.Services;
 using Backend.Services.Async; 
+using Backend.Services.Workers;
+using Backend.Services.Background;
 using Backend.Services.Pdf;
-using Backend.Workers; 
+using Backend.Interfaces; 
 using Sentry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -69,8 +71,8 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 );
 
 builder.Services.AddHttpClient<IAIService, AiService>();
-builder.Services.AddSingleton<ITicketQueue, RedisTicketQueue>(); 
-builder.Services.AddHostedService<TicketProcessingWorker>();
+builder.Services.AddSingleton<ITicketQueue, RedisTicketQueue>();
+builder.Services.AddHostedService<Backend.Services.Workers.TicketProcessingWorker>();
 builder.Services.AddHttpContextAccessor();
 
 var s3Config = new AmazonS3Config { ServiceURL = "http://s3-minio:9000", ForcePathStyle = true, UseHttp = true };
